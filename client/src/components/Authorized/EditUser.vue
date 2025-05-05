@@ -35,6 +35,7 @@
                     <select placeholder="Укажите роль" v-model="infoSelectedUser.Role">
                         <option value="admin">Администратор</option>
                         <option value="moderator">Модератор</option>
+                        <option value="mentor">Ментор</option>
                     </select>
                 </div>
 
@@ -49,8 +50,6 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
     props: ['selectedUser'],
     data() {
@@ -67,6 +66,15 @@ export default {
             messages: {
                 error: '',
                 success: ''
+            }
+        }
+    },
+    watch: {
+        'infoSelectedUser.Phone'() {
+            let str = this.infoSelectedUser.Phone
+            let rgx = /^(\+|\d)?(\d)*$/
+            if (!rgx.test(str)) {
+                this.infoSelectedUser.Phone = str.slice(0, -1)
             }
         }
     },
@@ -91,7 +99,7 @@ export default {
                 }
             }
         },
-        async editUser(){
+        async editUser() {
             await this.$store.dispatch('editUser', this.infoSelectedUser)
             // await this.$store.dispatch('downloadUsers')
             this.$emit('closeUserSettings');

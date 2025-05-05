@@ -35,13 +35,13 @@
                         </label>
                         <label for="HasConstantUnit_2" tabindex="5">Был ПУ, жду результат
                             <input type="radio" id="HasConstantUnit_2" v-model="fields.HasConstantUnit"
-                                value="жду результат">
+                                value="Жду результат">
                         </label>
                     </div>
                 </div>
 
                 <div class="fields__item"
-                    v-if="fields.HasConstantUnit == 'нет' || fields.HasConstantUnit == 'жду результат'">
+                    v-if="fields.HasConstantUnit == 'Нет' || fields.HasConstantUnit == 'Жду результат'">
                     <p class="fields__item-question">Сколько проведено пробных уроков?</p>
                     <div class="fields__item-row">
                         <label for="CountTrialUnits_0" tabindex="6">0<input id="CountTrialUnits_0" type="radio"
@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <div class="fields__item" v-if="fields.HasConstantUnit == 'да'">
+                <div class="fields__item" v-if="fields.HasConstantUnit == 'Да'">
                     <p class="fields__item-question">Сколько постоянных учеников на данный момент?</p>
                     <div class="fields__item-row">
                         <label for="CountConstantUnits_1" tabindex="15">1<input id="CountConstantUnits_1" type="radio"
@@ -87,7 +87,7 @@
                     </div>
                 </div>
 
-                <div class="fields__item" v-if="fields.HasConstantUnit == 'да'">
+                <div class="fields__item" v-if="fields.HasConstantUnit == 'Да'">
                     <p class="fields__item-question">Сколько модулей отправлено на проверку?</p>
                     <div class="fields__item-row">
                         <label for="CountPaidModules_0" tabindex="23">0<input id="CountPaidModules_0" type="radio"
@@ -210,13 +210,13 @@ export default {
             let { FIO, Phone, HasConstantUnit, CheckInfo, Comments, CountTrialUnits, CountConstantUnits, CountPaidModules, NewLoad } = this.fields
             let FeedBack = {}
             if (FIO && Phone && CheckInfo && Comments && NewLoad && HasConstantUnit) {
-                if (HasConstantUnit == 'да') {
+                if (HasConstantUnit == 'Да') {
                     if (CountConstantUnits != '' && CountPaidModules != '') {
                         CountTrialUnits = 0
                         FeedBack = { FIO, Phone, CheckInfo, Comments, NewLoad, HasConstantUnit, CountConstantUnits, CountPaidModules, CountTrialUnits }
                     } else { this.message.error = 'Заполните все поля'; }
                 }
-                if (HasConstantUnit == 'нет' || HasConstantUnit == 'жду результат') {
+                if (HasConstantUnit == 'Нет' || HasConstantUnit == 'Жду результат') {
                     if (CountTrialUnits) {
                         CountConstantUnits = 0
                         CountPaidModules = 0

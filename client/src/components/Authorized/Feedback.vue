@@ -106,7 +106,7 @@ export default {
 }
 
 .feedback_row {
-    background-color: var(--color_background-1_white);
+    background-color: var(--color_background-4_white);
     max-height: 50px;
     overflow: hidden;
     border-radius: 10px;

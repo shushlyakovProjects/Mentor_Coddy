@@ -50,32 +50,30 @@ router.post('/downloadEveryTrialLesson', async (request, response) => {
     const { UserId, Role } = request.dataFromChecking
     if (Role == 'admin' || Role == 'moderator') {
 
-        const { UserIds_MENTEES_LIST } = request.body
+        const { IDs_MENTEES_LIST } = request.body
 
         const days = 180
         let dateFrom = new Date(new Date() - days * 24 * 60 * 60 * 1000)
         let dateTo = new Date()
-        let TRIALS_LIST = []
-
 
         await axios.post(CRM_URL + `/GetEdUnits`, null, {
             params: { authkey: authkey_getEdUnits, dateFrom, dateTo, types: 'TrialLesson' }
         })
             .then((result) => {
                 const ALL_UNITS = result.data.EdUnits
-
+                
                 // Фильтрация. Необходимы только те учебные единицы, которые принадлежат менти
                 const ALL_TRIAL_BY_MENTEES_LIST = ALL_UNITS.filter((unit, index) => {
-                    return UserIds_MENTEES_LIST.includes(unit.ScheduleItems[0].TeacherUserId)
+                    return IDs_MENTEES_LIST.includes(unit.ScheduleItems[0].TeacherId)
                 })
 
                 let TRIALS_LIST = new Map()
                 ALL_TRIAL_BY_MENTEES_LIST.forEach((trial, index) => {
-                    const TeacherUserId = trial.ScheduleItems[0].TeacherUserId
-                    let oldValue = TRIALS_LIST.get(TeacherUserId)
+                    const TeacherId = trial.ScheduleItems[0].TeacherId
+                    let oldValue = TRIALS_LIST.get(TeacherId)
                     if (oldValue == undefined) { oldValue = 0 }
                     else { oldValue++ }
-                    TRIALS_LIST.set(TeacherUserId, oldValue)
+                    TRIALS_LIST.set(TeacherId, oldValue)
                 })
 
                 TRIALS_LIST = Object.fromEntries(TRIALS_LIST)
@@ -93,11 +91,10 @@ router.post('/downloadEveryTrialLesson', async (request, response) => {
 // Загрузка менти
 router.post('/downloadMenteeData', async (request, response) => {
     console.log('Загрузка менти...');
-    const { UserId, Role } = request.dataFromChecking
+    const { Role } = request.dataFromChecking
     if (Role == 'admin' || Role == 'moderator') {
         // ЗАГРУЗКА МЕНТИ
         const startTime = performance.now()
-
 
         await axios.post(CRM_URL + `/GetTeachers`, null, { params: { authkey: authkey_getTeachers, take: 2000 } })
             .then(async (result) => {
@@ -109,7 +106,7 @@ router.post('/downloadMenteeData', async (request, response) => {
                 TEACHERS_LIST.forEach(element => {
                     if (element.Status == 'Под менторством') {
                         MENTEES_LIST.push(element)
-                        UserIds_MENTEES_LIST.push(element.UserId)
+                        UserIds_MENTEES_LIST.push(element.Id)
                     }
                 });
 
@@ -128,7 +125,7 @@ router.post('/downloadMenteeData', async (request, response) => {
 
                         // Фильтрация. Необходимы только те учебные единицы, которые принадлежат менти
                         const ALL_UNITS_BY_MENTEES_LIST = ALL_UNITS.filter(unit => {
-                            return UserIds_MENTEES_LIST.includes(unit.ScheduleItems[0].TeacherUserId)
+                            return UserIds_MENTEES_LIST.includes(unit.ScheduleItems[0].TeacherId)
                         })
 
                         let added_mentee = []
@@ -142,6 +139,7 @@ router.post('/downloadMenteeData', async (request, response) => {
 
                                 // Перебор списка менти
                                 MENTEES_LIST.forEach((mentee, index) => {
+
                                     // Объект для учета учебных единиц
                                     let info_mentee_units = {
                                         CountAllEdUnits: 0,
@@ -149,16 +147,15 @@ router.post('/downloadMenteeData', async (request, response) => {
                                         CountConstantUnits: 0,
                                     }
 
-                                    // Определение новых менти
-                                    mentee.PrevBrief = menteeFromDataBase.find((infoFromDB) => { return infoFromDB.UserId == mentee.UserId })
+                                    // Определение новых и выпущенных менти
+                                    mentee.PrevBrief = menteeFromDataBase.find((infoFromDB) => { return infoFromDB.MenteeId == mentee.Id })
                                     if (mentee.PrevBrief == undefined) { added_mentee.push(mentee) }
-                                    if (mentee.PrevBrief != undefined) { menteeFromDataBase.splice(menteeFromDataBase.findIndex(menteeFromDB => menteeFromDB.UserId == mentee.UserId), 1) }
-
+                                    if (mentee.PrevBrief != undefined) { menteeFromDataBase.splice(menteeFromDataBase.findIndex(menteeFromDB => menteeFromDB.MenteeId == mentee.Id), 1) }
 
                                     // Перебор всех учебных единиц, распределение по разным менти
                                     ALL_UNITS_BY_MENTEES_LIST.forEach((unit) => {
-                                        const teacherUserIdOfUnit = unit.ScheduleItems[0].TeacherUserId
-                                        if (teacherUserIdOfUnit == mentee.UserId) {
+                                        const teacherUserIdOfUnit = unit.ScheduleItems[0].TeacherId
+                                        if (teacherUserIdOfUnit == mentee.Id) {
                                             info_mentee_units.CountAllEdUnits++
                                             if (unit.Type == 'TrialLesson') { info_mentee_units.CountTrialUnitsForWeek++ }
                                             if (unit.Type != 'TrialLesson') { info_mentee_units.CountConstantUnits++ }

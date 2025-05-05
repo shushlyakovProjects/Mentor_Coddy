@@ -35,6 +35,9 @@ export default {
             }
         }
     },
+    mounted(){
+        if(localStorage.Email){this.dataOfUser.Email = localStorage.Email}
+    },
     methods: {
         async authorization() {
             await axios.post('/server/authorization', this.dataOfUser)
@@ -42,6 +45,7 @@ export default {
                     this.messages.error = ''
                     this.messages.success = 'Успешно'
                     this.$router.push('/mentor/lk')
+                    localStorage.setItem('Email', this.dataOfUser.Email)
                 })
                 .catch((error) => {
                     console.log(error);

@@ -10,7 +10,7 @@ export default {
         },
         async downloadUsers(context) {
             await axios.post('/server/from-admin/downloadUsers')
-                .then((result) => {context.commit('updateUsersList', result.data)})
+                .then((result) => { context.commit('updateUsersList', result.data) })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
         async editUser(context, infoSelectedUser) {
@@ -23,8 +23,11 @@ export default {
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
         async deleteUser(context, UserId) {
-            await axios.post('/server/from-admin/deleteUser')
-                .then((result) => { context.commit('updateMessageSuccess', 'Пользователь удален успешно!') })
+            await axios.post('/server/from-admin/deleteUser', { UserId })
+                .then((result) => {
+                    context.commit('updateMessageSuccess', { info: 'Пользователь удален успешно!', isReady: true })
+                    context.dispatch('downloadUsers')
+                })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
         // Проверка на существование учетных записей
@@ -42,7 +45,7 @@ export default {
     },
     mutations: {
         updateUsersList(state, newData) {
-            if(!state.USERS_LIST.length){this.commit('updateMessageSuccess', { info: 'Пользователи получены!', isReady: true })}
+            if (!state.USERS_LIST.length) { this.commit('updateMessageSuccess', { info: 'Пользователи получены!', isReady: true }) }
             state.USERS_LIST = newData
         },
         updatePathToRegAdmin(state, path) {

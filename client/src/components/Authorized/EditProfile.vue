@@ -33,7 +33,7 @@ export default {
     data() {
         return {
             infoCurrentUser: {},
-            hiddenFields: ['user_id', 'role'],
+            hiddenFields: ['UserId', 'Role'],
             messages: {
                 error: '',
                 success: ''
@@ -45,19 +45,15 @@ export default {
     // При переходе на компонент
     mounted() {
         window.addEventListener('keydown', this.closeProfileSettings, { once: true })
-        this.downloadCurrentUser()
+        this.fillAllFields()
     },
     // При обновлении приложения
     watch: {
-        getCurrentUser() { this.downloadCurrentUser() },
-        // 'infoCurrentUser.phone_number'() {
-        //     let str = this.infoCurrentUser.phone_number
-        //     this.infoCurrentUser.phone_number = str.replace(/[^\d ]/, '')
-        // },
+        getCurrentUser() { this.fillAllFields() },
         'infoCurrentUser.phone_number'() {
             let str = this.infoCurrentUser.phone_number
             let rgx = /^(\+|\d)?(\d)*$/
-            if (!rgx.test(str)) {his.infoCurrentUser.phone_number = str.slice(0, -1)}
+            if (!rgx.test(str)) { his.infoCurrentUser.phone_number = str.slice(0, -1) }
         }
     },
     methods: {
@@ -67,9 +63,9 @@ export default {
                 window.removeEventListener('keydown', this.closeProfileSettings, { once: true })
             }
         },
-        downloadCurrentUser() {
+        fillAllFields() {
             for (let key in this.getCurrentUser) {
-                if (key == 'password') {
+                if (key == 'Password') {
                     this.infoCurrentUser[key] = ''
                 }
                 else if (this.hiddenFields.indexOf(key) == -1) {
@@ -78,18 +74,9 @@ export default {
             }
         },
         async editProfile() {
-            await axios.post('/server/from-mentor/edit-profile', this.infoCurrentUser)
-                .then((result) => {
-                    this.messages.error = ''
-                    this.messages.success = 'Успешно'
-                    this.$emit('closeProfileSettings');
-                    this.$store.dispatch('checkAuthorization', this.$router)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.messages.error = error.response.data
-                    this.messages.success = ''
-                })
+            await this.$store.dispatch('editProfile', this.infoCurrentUser)
+            await this.$store.dispatch('checkAuthorization')
+            this.$emit('closeProfileSettings');
         }
     },
 
@@ -113,5 +100,4 @@ export default {
     align-items: center;
     backdrop-filter: blur(3px);
 }
-
 </style>

@@ -22,6 +22,24 @@ router.use((request, response, next) => {
     })
 })
 
+router.post('/deleteUser', (request, response) => {
+    console.log('Удаление пользователя...');
+    const { Role } = request.dataFromChecking
+    const { UserId } = request.body
+    if (Role == 'admin') {
+        console.log(UserId);
+
+        const SQL_QUERY = `DELETE FROM users WHERE UserId='${UserId}'`
+        connectionDB.query(SQL_QUERY, (error, result) => {
+            if (error) { response.status(500).send('Ошибка базы данных') }
+            else { response.status(200).send('Пользователь удален успешно!') }
+        })
+    }
+    else {
+        response.status(403).send('Доступ запрещен!')
+    }
+})
+
 router.post('/uploadToDataBaseForSummary', (request, response) => {
     console.log('Загрузка сводки в базу...');
     const { UserId, Role } = request.dataFromChecking
@@ -32,7 +50,7 @@ router.post('/uploadToDataBaseForSummary', (request, response) => {
         VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewEdUnits}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}','${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
         connectionDB.query(SQL_QUERY, (error, result) => {
             if (error) {
-                if (error.sqlMessage.includes('Duplicate')) { response.status(501).send('Данные сегодня уже загружались') }
+                if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данные сегодня уже загружались') }
                 else { response.status(500).send('Ошибка базы данных') }
             }
             else { response.status(200).send('Сводка загружена в базу успешно!') }
@@ -129,10 +147,13 @@ router.post('/addNewUser', (request, response) => {
         const salt = bcrypt.genSaltSync(5) // Генерируем соль
         const hashPass = bcrypt.hashSync(Password, salt) // Хешируем пароль
 
-        const SQL_QUERY = `INSERT INTO users (UserUserId, Email, Password, Phone, FirstName, LastName, Role) 
+        const SQL_QUERY = `INSERT INTO users (UserId, Email, Password, Phone, FirstName, LastName, Role) 
             VALUES (null, '${Email}', '${hashPass}', '${Phone}', '${FirstName}', '${LastName}', '${Role}')`
         connectionDB.query(SQL_QUERY, (error, result) => {
-            if (error) { response.status(500).send('Ошибка базы данных') }
+            if (error) {
+                if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данный Email уже занят') }
+                else { response.status(500).send('Ошибка базы данных') }
+            }
             else { response.status(200).send('Пользователь добавлен') }
         })
     }
@@ -157,7 +178,10 @@ router.post('/edit-user', (request, response) => {
         else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}', Role='${Role}' WHERE UserId='${UserId}'` }
 
         connectionDB.query(SQL_QUERY, (error, result) => {
-            if (error) { response.status(500).send('Ошибка базы данных') }
+            if (error) {
+                if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данный Email уже занят') }
+                else { response.status(500).send('Ошибка базы данных') }
+            }
             else { response.status(200).send('Данные обновлены успешно!') }
         })
     } else {

@@ -109,9 +109,6 @@ export default {
         getMenteeListOnlyShushlyakov() { this.updateFields() },
     },
     methods: {
-        // getInfoFromGoogleTable(){
-        //     this.$store.dispatch('downloadInfoFromGoogleTable')
-        // },
         getSummaryFromDataBase() {
             if (this.getPreviousSummary.length == 0) { this.$store.dispatch('downloadSummaryFromDataBase') }
         },
@@ -146,7 +143,7 @@ export default {
 
             });
 
-            // ПОЛУЧАТЬ ИНФОРМАЦИЮ С GOOGLE TABLE
+            // ПОЛУЧАТЬ ИНФОРМАЦИЮ С ОБРАТНОЙ СВЯЗИ
             // this.fields.countOfPaidModules = 0
 
         },

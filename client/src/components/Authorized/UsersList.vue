@@ -62,8 +62,10 @@ export default {
     },
     methods: {
         deleteUser(user){
-            const {UserName, UserId} = user
-            // if(confirm(`Вы хотите удалить пользователя: "${}"`))
+            const {UserId, LastName, FirstName, Email} = user
+            if(confirm(`Вы хотите удалить пользователя: "${LastName} ${FirstName} (${Email})?"`)){
+                this.$store.dispatch('deleteUser', UserId)
+            }
         }
     },
 }

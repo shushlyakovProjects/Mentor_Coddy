@@ -12,36 +12,36 @@
             <form class="fields" @submit.prevent="addNewUser">
                 <div class="fields__item">
                     <p>Email</p>
-                    <input type="email" placeholder="Укажите email" v-model="infoNewUser.email" required>
+                    <input type="email" placeholder="Укажите email" v-model="infoNewUser.Email" required>
                 </div>
                 <div class="fields__item">
                     <p>Пароль</p>
-                    <input type="text" placeholder="Укажите пароль" v-model="infoNewUser.password" required>
+                    <input type="text" placeholder="Укажите пароль" v-model="infoNewUser.Password" required>
                 </div>
                 <div class="fields__item">
                     <p>Номер телефона</p>
-                    <input type="text" placeholder="Укажите номер телефона" v-model="infoNewUser.phone_number" required>
+                    <input type="text" placeholder="Укажите номер телефона" v-model="infoNewUser.Phone" required>
                 </div>
                 <div class="fields__item">
                     <p>Имя</p>
-                    <input type="text" placeholder="Укажите имя" v-model="infoNewUser.first_name" required>
+                    <input type="text" placeholder="Укажите имя" v-model="infoNewUser.FirstName" required>
                 </div>
                 <div class="fields__item">
                     <p>Фамилия</p>
-                    <input type="text" placeholder="Укажите фамилию" v-model="infoNewUser.last_name" required>
+                    <input type="text" placeholder="Укажите фамилию" v-model="infoNewUser.LastName" required>
                 </div>
                 <div class="fields__item">
                     <p>Роль</p>
-                    <select placeholder="Укажите роль" v-model="infoNewUser.role" required>
+                    <select placeholder="Укажите роль" v-model="infoNewUser.Role" required>
                         <option value="" selected disabled hidden>Укажите уровень доступа</option>
                         <option value="admin">Администратор</option>
                         <option value="moderator">Модератор</option>
+                        <option value="mentor">Ментор</option>
                     </select>
                 </div>
 
                 <input type="submit" value="Добавить пользователя">
-                <p class="small errorMessage">{{ messages.error }}</p>
-                <p class="small successMessage">{{ messages.success }}</p>
+
             </form>
 
         </main>
@@ -54,24 +54,23 @@ export default {
     data() {
         return {
             infoNewUser: {
-                email: '',
-                password: '',
-                phone_number: '',
-                first_name: '',
-                last_name: '',
-                role: ''
+                Email: '',
+                Password: '',
+                Phone: '',
+                FirstName: '',
+                LastName: '',
+                Role: ''
             },
-            messages: {
-                error: '',
-                success: ''
-            }
         }
     },
     mounted() { window.addEventListener('keydown', this.closeAddUser, { once: true }) },
     watch: {
-        'infoNewUser.phone_number'() {
-            let str = this.infoNewUser.phone_number
-            this.infoNewUser.phone_number = str.replace(/[^\d ]/, '')
+        'infoNewUser.Phone'() {
+            let str = this.infoNewUser.Phone
+            let rgx = /^(\+|\d)?(\d)*$/
+            if (!rgx.test(str)) {
+                this.infoNewUser.Phone = str.slice(0, -1)
+            }
         }
     },
     methods: {
