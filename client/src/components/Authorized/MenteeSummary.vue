@@ -8,50 +8,37 @@
                 </div>
 
                 <nav>
-                    <button @click="uploadToDataBaseForSummary()" title="Начать недельный отсчёт">Еженедельная фиксация</button>
+                    <button @click="uploadToDataBaseForSummary('weekly')" title="Начать недельный отсчёт">Еженедельная
+                        фиксация</button>
+                    <button @click="uploadToDataBaseForSummary('monthly')" title="Начать месячный отсчёт">Ежемесячная
+                        фиксация</button>
                 </nav>
             </header>
 
             <div class="summary_wrapper">
 
-                <div class="summary_wrapper-flex">
+                <!-- Общая информация -->
+                <div class="summary_wrapper-item">
                     <div class="summary__card">
                         <h3>Общая информация:</h3>
-                        <p>Предыдущая сводка: {{ getPreviousSummary.DateOfUpdate }}</p>
                         <p>Всего менти на данный момент: {{ fields.countOfMentee }}</p>
                         <p>Всего постоянных учеников: {{ fields.countOfConstantUnits }}</p>
-                    </div>
-                    <div class="summary__card">
-                        <h3>С последней загрузки (еженедельная)</h3>
-                        <p>Менти новых: {{ getAddedMenteeList.length }}</p>
-                        <p>Получено учеников: {{
-                            getDifference(getPreviousSummary.CountOfConstantUnits, fields.countOfConstantUnits ) }}
-                        </p>
-                        <p>Проведено пробников: {{ fields.countOfNewTrials -
-                            getPreviousSummary.СountOfNewTrials }}
-                        </p>
-                        <p>Отправлено модулей с прошлой недели: {{ getPreviousSummary.CountOfPaidModules }}</p>
                     </div>
                     <div class="summary_before">
                         <h3>Дополнительно</h3>
                         <p>Всего отправлено модулей на проверку: {{ fields.countOfPaidModules }}</p>
                     </div>
-                </div>
-
-                <div class="summary_wrapper-flex">
                     <div class="summary__card">
                         <h3>Количество менти</h3>
                         <p>С постоянными учениками: {{ fields.countOfMenteeWithConstantUnits }}</p>
                         <p>Без постоянных учеников: {{ fields.countOfMenteeWithoutConstantUnits }}</p>
-                        <!-- <p>Получили постоянных учеников: {{ fields.countOfMenteeWithConstantUnits -
-                            getPreviousSummary.CountOfMenteeWithConstantUnits > 0 ?
-                            fields.countOfMenteeWithConstantUnits -
-                            getPreviousSummary.CountOfMenteeWithConstantUnits : 0 }}
-                        </p> -->
-                        <p>Занятых: {{ (fields.countOfMenteeWithConstantUnits / fields.countOfMentee *
-                            100).toFixed(2) }}%
-                        </p>
+                        <p>Занятых: {{ (fields.countOfMenteeWithConstantUnits / fields.countOfMentee * 100).toFixed(2)
+                            }}%</p>
                     </div>
+                </div>
+
+                <!-- Менти прибывшие/завершившие -->
+                <div class="summary_wrapper-item">
                     <div class="summary__card">
                         <h3>Менти прибывшие:</h3>
                         <p v-for="(item, index) in getAddedMenteeList">* {{ item.LastName }} {{ item.FirstName }}
@@ -61,14 +48,51 @@
 
                     <div class="summary__card">
                         <h3>Менти завершившие:</h3>
-                        <p v-for="(item, index) in getExcludedMenteeList">* {{ item.LastName }} {{ item.FirstName }}
-                            <a :href='`https://coddy.t8s.ru/Profile/${item.Id}`' target="_blank">CRM</a>
+                        <p v-for="(item, index) in getExcludedMenteeList">
+                            * {{ item.LastName }} {{ item.FirstName }}
+                            <a :href='`https://coddy.t8s.ru/Profile/${item.MenteeId}`' target="_blank">CRM</a>
+                            ({{ item.Status }})
                         </p>
                     </div>
 
                     <div class="loading" v-if="!fields.countOfMentee"></div>
                 </div>
 
+                <!-- ЗА НЕДЕЛЮ -->
+                <div class="summary_wrapper-item">
+                    <div class="summary__card">
+                        <h3>Отчет за неделю</h3>
+                        <p>Предыдущая сводка: {{ getPreviousSummaryWeekly.DateOfUpdate }}</p>
+                    </div>
+                    <div class="summary__card">
+                        <p>Менти новых: {{ getAddedMenteeList.length }}</p>
+                        <p>Получено учеников: {{ getDifference(getPreviousSummaryWeekly.CountOfConstantUnits,
+                            fields.countOfConstantUnits) }}</p>
+                        <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryWeekly.СountOfNewTrials
+                        }}
+                        </p>
+                        <p>Отправлено модулей: {{ getPreviousSummaryWeekly.CountOfPaidModules }}</p>
+                    </div>
+                </div>
+
+                <!-- ЗА МЕСЯЦ -->
+                <div class="summary_wrapper-item">
+                    <div class="summary__card">
+                        <h3>Отчет за месяц</h3>
+                        <p>Предыдущая сводка: {{ getPreviousSummaryMonthly.DateOfUpdate }}</p>
+                    </div>
+                    <div class="summary__card">
+                        <p>Менти новых: {{ getAddedMenteeList.length }}</p>
+                        <p>Получено учеников: {{
+                            getDifference(getPreviousSummaryMonthly.CountOfConstantUnits, fields.countOfConstantUnits)
+                            }}
+                        </p>
+                        <p>Проведено пробников: {{ fields.countOfNewTrials -
+                            getPreviousSummaryMonthly.СountOfNewTrials }}
+                        </p>
+                        <p>Отправлено модулей: {{ getPreviousSummaryMonthly.CountOfPaidModules }}</p>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -87,8 +111,6 @@ export default {
             fields: {
                 countOfMentee: 0,
 
-                countOfNewMentee: 0,
-                countOfNewEdUnits: 0,
                 countOfNewTrials: 0,
 
                 countOfMenteeWithConstantUnits: 0,
@@ -103,28 +125,32 @@ export default {
         this.getMenteeData()
         this.updateFields()
         this.getSummaryFromDataBase()
+        if (this.getFeedbackList.length == 0) { this.$store.dispatch('downloadFeedbackFromDatabase') }
     },
-    computed: { ...mapGetters(['getMenteeListOnlyShushlyakov', 'getPreviousSummary', 'getAddedMenteeList', 'getExcludedMenteeList']) },
+    computed: {
+        ...mapGetters(['getMenteeListOnlyShushlyakov', 'getPreviousSummaryWeekly',
+            'getPreviousSummaryMonthly', 'getAddedMenteeList', 'getExcludedMenteeList', 'getFeedbackList'])
+    },
     watch: {
         getMenteeListOnlyShushlyakov() { this.updateFields() },
     },
     methods: {
         getSummaryFromDataBase() {
-            if (this.getPreviousSummary.length == 0) { this.$store.dispatch('downloadSummaryFromDataBase') }
+            this.$store.dispatch('downloadSummaryFromDataBase')
         },
-        uploadToDataBaseForSummary() {
+        uploadToDataBaseForSummary(period) {
             const { countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules } = this.fields
-            const data = { countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules }
-            this.$store.dispatch('uploadToDataBaseForSummary', data)
+            const data = { period, countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules }
+            if (confirm('Уверены, что хотите начать отсчет с текущего дня?')) {
+                this.$store.dispatch('uploadToDataBaseForSummary', data)
+            }
+
         },
         updateFields() {
             const LIST = this.getMenteeListOnlyShushlyakov
             this.fields.countOfMentee = LIST.length
 
-            // this.fields.countOfNewMentee = 0
-            // this.fields.countOfNewEdUnits = 0
-
-            // let LIST_PREV_SUMMARY = new Map(Object.entries(this.getPreviousSummary))
+            // let LIST_PREV_SUMMARY = new Map(Object.entries(this.getPreviousSummaryWeekly))
             // console.log(LIST_PREV_SUMMARY);
 
             this.fields.countOfConstantUnits = 0
@@ -139,13 +165,14 @@ export default {
                 } else {
                     this.fields.countOfMenteeWithoutConstantUnits++
                 }
-                // console.log(mentee);
+
+                // Если обратная связь данного менти найдена в БД. То достаем данные
+                let hisFeedbak = this.getFeedbackList.find((feedback) => feedback.FIO.includes(mentee.LastName))
+                if (hisFeedbak != undefined) {
+                    this.fields.countOfPaidModules += hisFeedbak.CountPaidModules
+                }
 
             });
-
-            // ПОЛУЧАТЬ ИНФОРМАЦИЮ С ОБРАТНОЙ СВЯЗИ
-            // this.fields.countOfPaidModules = 0
-
         },
         async getMenteeData() {
             if (this.getMenteeListOnlyShushlyakov.length == 0) { await this.$store.dispatch('downloadMenteeData') }
@@ -165,14 +192,23 @@ export default {
     margin-bottom: 20px;
 }
 
-.summary_wrapper {
+header nav {
     display: flex;
-    gap: 120px;
+    gap: 10px;
 }
 
-.summary_wrapper-flex {
+.summary_wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.summary_wrapper-item {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    border: 1px solid gray;
+    padding: 10px;
+    border-radius: 10px;
 }
 </style>

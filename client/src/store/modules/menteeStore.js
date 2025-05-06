@@ -36,11 +36,11 @@ export default {
             let DATALIST_FORTRACKING = []
             this.MENTEE_LIST.forEach((mentee, index) => {
                 // Постоянные ученики, Пробные уроки, Завершенные модули
-                const { Disciplines, FirstName, LastName, Id } = mentee
+                const { Status, Disciplines, FirstName, LastName, Id } = mentee
                 const { CountAllEdUnits, CountConstantUnits, CountTrialUnitsForWeek, CountTrialLessonsForSixMonths } = mentee.InfoEdUnits
                 let DATA_FORTRACKING = {
                     Id, LastName, FirstName, Disciplines, CountAllEdUnits,
-                    CountConstantUnits, CountTrialUnitsForWeek, CountTrialLessonsForSixMonths
+                    CountConstantUnits, CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, Status
                 }
                 DATALIST_FORTRACKING.push(DATA_FORTRACKING)
             })

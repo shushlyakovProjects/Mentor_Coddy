@@ -11,7 +11,7 @@ function getDateNow() {
     const year = fullDate.getFullYear()
     const month = fullDate.getMonth() + 1 < 10 ? '0' + (fullDate.getMonth() + 1) : (fullDate.getMonth() + 1)
     const day = fullDate.getDate() < 10 ? '0' + fullDate.getDate() : fullDate.getDate()
-    return `${day}-${month}-${year}`
+    return `${year}-${month}-${day}`
 }
 
 router.use((request, response, next) => {
@@ -46,14 +46,18 @@ router.post('/uploadToDataBaseForSummary', (request, response) => {
     const { data } = request.body
 
     if (Role == 'admin') {
-        const SQL_QUERY = `INSERT INTO summary (DateOfUpdate, CountOfMentee, СountOfNewEdUnits, СountOfNewTrials, CountOfMenteeWithConstantUnits, CountOfConstantUnits, CountOfPaUserIdModules) 
+        const table = data.period == 'weekly' ? 'summary_weekly' : 'summary_monthly'
+        const SQL_QUERY = `INSERT INTO ${table} (DateOfUpdate, CountOfMentee, СountOfNewEdUnits, СountOfNewTrials, CountOfMenteeWithConstantUnits, CountOfConstantUnits, CountOfPaidModules) 
         VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewEdUnits}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}','${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
         connectionDB.query(SQL_QUERY, (error, result) => {
             if (error) {
                 if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данные сегодня уже загружались') }
                 else { response.status(500).send('Ошибка базы данных') }
             }
-            else { response.status(200).send('Сводка загружена в базу успешно!') }
+            else {
+                console.log('Сводка загружена успешно!');
+                response.status(200).send('Сводка загружена в базу успешно!')
+            }
         })
 
     }
@@ -91,17 +95,19 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                         CountTrialUnitsForWeek='${mentee.CountTrialUnitsForWeek}', 
                         CountTrialLessonsForSixMonths='${mentee.CountTrialLessonsForSixMonths}', 
                         CountConstantUnits='${mentee.CountConstantUnits}',
-                        LastUpdate='${getDateNow()}' 
+                        LastUpdate='${getDateNow()}',
+                        Status='${Status}' 
                         WHERE MenteeId='${mentee.MenteeId}' AND 
                         (LastName<>'${mentee.LastName}' OR FirstName<>'${mentee.FirstName}' 
                         OR Disciplines<>'${mentee.Disciplines}' OR CountAllEdUnits<>'${mentee.CountAllEdUnits}' 
                         OR CountTrialUnitsForWeek<>'${mentee.CountTrialUnitsForWeek}' OR CountConstantUnits<>'${mentee.CountConstantUnits}'
-                        OR CountTrialLessonsForSixMonths<>'${mentee.CountTrialLessonsForSixMonths}')`
+                        OR CountTrialLessonsForSixMonths<>'${mentee.CountTrialLessonsForSixMonths}' OR Status<>'${Status}')`
                     } else {
                         SQL_QUERY = `INSERT INTO mentees (MenteeId, LastName, FirstName, Disciplines, CountAllEdUnits, 
-                        CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, CountConstantUnits, LastUpdate) 
+                        CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, CountConstantUnits, LastUpdate, Status) 
                         VALUES ('${mentee.MenteeId}', '${mentee.LastName}', '${mentee.FirstName}', '${mentee.Disciplines}', 
-                        '${mentee.CountAllEdUnits}', '${mentee.CountTrialUnitsForWeek}', '${mentee.CountTrialLessonsForSixMonths}', '${mentee.CountConstantUnits}', '${getDateNow()}')`
+                        '${mentee.CountAllEdUnits}', '${mentee.CountTrialUnitsForWeek}', '${mentee.CountTrialLessonsForSixMonths}', 
+                        '${mentee.CountConstantUnits}', '${getDateNow()}', '${Status}')`
                     }
 
                     connectionDB.query(SQL_QUERY, (error, result) => {

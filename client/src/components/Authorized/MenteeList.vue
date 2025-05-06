@@ -69,7 +69,6 @@
                             </form>
                         </transition>
 
-
                     </div>
                     <button @click="uploadToDataBaseForTracking()" id="btn_uploadToDataBaseForTracking"
                         title="Отслеживать динамику с текущего момента"
