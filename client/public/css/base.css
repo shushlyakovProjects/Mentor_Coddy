@@ -106,7 +106,7 @@ p {
     font-size: var(--size_textDesktop_body-1)
 }
 
-p.small {
+.small {
     font-size: var(--size_textDesktop_body-2)
 }
 

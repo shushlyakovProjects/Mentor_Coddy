@@ -37,10 +37,28 @@ router.post('/downloadSummaryFromDataBase', async (request, response) => {
     console.log('Загрузка предыдущей сводки...');
     const { UserId, Role } = request.dataFromChecking
     if (Role == 'admin' || Role == 'moderator') {
-        const SQL_QUERY = `SELECT * FROM summary ORDER BY DateOfUpdate DESC LIMIT 1`
-        connectionDB.query(SQL_QUERY, (err, result) => {
+        let ALL_SUMMARY = {
+            prev_summary_weekly: null,
+            prev_summary_monthly: null,
+        }
+
+        // Получение сводки сначала за неделю
+        const SQL_QUERY_WEEKLY = `SELECT * FROM summary_weekly ORDER BY DateOfUpdate DESC LIMIT 1`
+        connectionDB.query(SQL_QUERY_WEEKLY, (err, result) => {
             if (err) { response.status(500).send('Ошибка базы данных') }
-            else { response.status(200).json(result) }
+            else {
+                ALL_SUMMARY.prev_summary_weekly = result
+
+                // Если данные за неделю успешно получены, то получение за месяц
+                const SQL_QUERY_MONTHLY = `SELECT * FROM summary_monthly ORDER BY DateOfUpdate DESC LIMIT 1`
+                connectionDB.query(SQL_QUERY_MONTHLY, (err, result) => {
+                    if (err) { response.status(500).send('Ошибка базы данных') }
+                    else {
+                        ALL_SUMMARY.prev_summary_monthly = result
+                        response.status(200).json(ALL_SUMMARY)
+                    }
+                })
+            }
         })
     } else { { response.status(403).send('Доступ запрещен') } }
 })
@@ -61,7 +79,7 @@ router.post('/downloadEveryTrialLesson', async (request, response) => {
         })
             .then((result) => {
                 const ALL_UNITS = result.data.EdUnits
-                
+
                 // Фильтрация. Необходимы только те учебные единицы, которые принадлежат менти
                 const ALL_TRIAL_BY_MENTEES_LIST = ALL_UNITS.filter((unit, index) => {
                     return IDs_MENTEES_LIST.includes(unit.ScheduleItems[0].TeacherId)
@@ -204,6 +222,7 @@ router.post('/edit-profile', (request, response) => {
         else { response.status(200).send('Данные обновлены успешно!') }
     })
 })
+
 
 
 
