@@ -15,7 +15,6 @@ export default {
         async checkAuthorization(context, router) {
             await axios.post('/server/authorization')
                 .then((result) => {
-                    // console.log(result);
                     context.commit('updateCurrentUser', result.data[0])
                 })
                 .catch((error) => {

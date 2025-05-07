@@ -10,7 +10,7 @@ export default {
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
         async deleteCheckedFeedbackFromDatabase(context, checkedList) {
-            await axios.post('/server/from-admin/deleteCheckedFeedbackFromDatabase', { checkedList })
+            await axios.post('/server/from-mentor/deleteCheckedFeedbackFromDatabase', { checkedList })
                 .then((result) => {
                     context.commit('updateMessageSuccess', { info: result.data, isReady: true })
                     this.dispatch('downloadFeedbackFromDatabase')
@@ -40,7 +40,6 @@ export default {
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
         async uploadToDataBaseForTracking(context, MENTEE_LIST) {
-
             let DATALIST_FORTRACKING = []
             MENTEE_LIST.forEach((mentee, index) => {
                 // Постоянные ученики, Пробные уроки, Завершенные модули
@@ -53,7 +52,7 @@ export default {
                 DATALIST_FORTRACKING.push(DATA_FORTRACKING)
             })
 
-            await axios.post('/server/from-admin/uploadToDataBaseForTracking', { DATALIST_FORTRACKING })
+            await axios.post('/server/from-mentor/uploadToDataBaseForTracking', { DATALIST_FORTRACKING })
                 .then((result) => { context.commit('updateMessageSuccess', { info: result.data, isReady: true }) })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },

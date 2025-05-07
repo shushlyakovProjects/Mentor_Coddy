@@ -15,8 +15,6 @@
                     <input type="text" :placeholder="'Укажите ' + index" v-model="infoCurrentUser[index]">
                 </div>
 
-                <p>Дополнительная проверка на администратора?</p>
-
                 <button @click="editAdmin">Обновить данные</button>
                 <p class="small errorMessage">{{ messages.error }}</p>
                 <p class="small successMessage">{{ messages.success }}</p>

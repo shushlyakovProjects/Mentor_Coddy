@@ -32,10 +32,10 @@
                 </div>
                 <div class="fields__item">
                     <p>Роль</p>
-                    <select placeholder="Укажите роль" v-model="infoSelectedUser.Role">
+                    <select v-model="infoSelectedUser.Role"> 
                         <option value="admin">Администратор</option>
-                        <option value="moderator">Модератор</option>
                         <option value="mentor">Ментор</option>
+                        <option value="reader">Читатель</option>
                     </select>
                 </div>
 

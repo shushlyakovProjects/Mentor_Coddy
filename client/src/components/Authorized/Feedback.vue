@@ -57,8 +57,8 @@
                     <button @click="$router.push('/mentee/feedback')" title="Просмотр формы сбора ОС">Форма</button>
                     <button @click="deleteCheckedFeedback()" title="Удалить выбранные"
                         v-show="checkedList.length != 0">Удалить</button>
-                    <img @click="getFeedbackFromDatabase(true)" class="likeButton icon" src="../../../public/img/update.svg"
-                        title="Обновить данные" alt="Обновить">
+                    <img @click="getFeedbackFromDatabase(true)" class="likeButton icon"
+                        src="../../../public/img/update.svg" title="Обновить данные" alt="Обновить">
                 </nav>
             </header>
 
@@ -111,9 +111,6 @@
             </div>
 
             <div class="loading" v-if="!FEEDBACK_LIST.length"></div>
-
-            <!-- ДОБАВИТЬ ОЧИСТКУ ОС -->
-
 
         </main>
     </div>

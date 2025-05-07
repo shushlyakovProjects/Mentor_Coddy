@@ -312,7 +312,7 @@ header nav {
     border: 1px solid var(--color_accent_gray);
     padding: 5px 10px;
     display: grid;
-    grid-template-columns: 30px 100px 160px 160px 200px 1fr 50px;
+    grid-template-columns: 30px 100px 160px 160px 200px 1fr 100px;
     align-items: start;
     overflow-wrap: anywhere;
     gap: 20px;
