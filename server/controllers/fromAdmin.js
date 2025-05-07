@@ -11,7 +11,7 @@ function getDateNow() {
     const year = fullDate.getFullYear()
     const month = fullDate.getMonth() + 1 < 10 ? '0' + (fullDate.getMonth() + 1) : (fullDate.getMonth() + 1)
     const day = fullDate.getDate() < 10 ? '0' + fullDate.getDate() : fullDate.getDate()
-    return `${year}-${month}-${day}`
+    return `${day}-${month}-${year}`
 }
 
 router.use((request, response, next) => {
@@ -20,6 +20,24 @@ router.use((request, response, next) => {
         if (error) { response.status(401).send('Токен доступа недействителен') }
         else { request.dataFromChecking = decodeData; next() }
     })
+})
+
+router.post('/deleteCheckedFeedbackFromDatabase', (request, response) => {
+    console.log('Удаление записей обратной связи...');
+    const { Role } = request.dataFromChecking
+    const { checkedList } = request.body
+    if (Role == 'admin') {
+        console.log(checkedList);
+
+        const SQL_QUERY = `DELETE FROM feedbacks WHERE FeedBackID IN (${checkedList})`
+        connectionDB.query(SQL_QUERY, (error, result) => {
+            if (error) { response.status(500).send('Ошибка базы данных') }
+            else { response.status(200).send('Записи обратной связи удалены успешно!') }
+        })
+    }
+    else {
+        response.status(403).send('Доступ запрещен!')
+    }
 })
 
 router.post('/deleteUser', (request, response) => {
@@ -47,8 +65,11 @@ router.post('/uploadToDataBaseForSummary', (request, response) => {
 
     if (Role == 'admin') {
         const table = data.period == 'weekly' ? 'summary_weekly' : 'summary_monthly'
-        const SQL_QUERY = `INSERT INTO ${table} (DateOfUpdate, CountOfMentee, СountOfNewEdUnits, СountOfNewTrials, CountOfMenteeWithConstantUnits, CountOfConstantUnits, CountOfPaidModules) 
-        VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewEdUnits}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}','${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
+        const SQL_QUERY = `INSERT INTO ${table} (DateOfUpdate, CountOfMentee, СountOfNewEdUnits, СountOfNewTrials, 
+                CountOfMenteeWithConstantUnits, CountOfConstantUnits, CountOfPaidModules) 
+                VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewEdUnits}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}',
+                '${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
+
         connectionDB.query(SQL_QUERY, (error, result) => {
             if (error) {
                 if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данные сегодня уже загружались') }
@@ -86,7 +107,9 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                 let changedRows = 0
 
                 DATALIST_FORTRACKING.forEach((mentee, index) => {
-                    if (UserIds_EXISTING_MENTEES.includes(mentee.MenteeId)) {
+                    if (UserIds_EXISTING_MENTEES.includes(mentee.Id)) {
+                        // Удаление ID из списка. Нужно для определения ID тех, кто вышел из-под менторства (они останутся нетронутыми)
+                        UserIds_EXISTING_MENTEES = UserIds_EXISTING_MENTEES.filter(id => id != mentee.Id)
                         SQL_QUERY = `UPDATE mentees SET 
                         LastName='${mentee.LastName}', 
                         FirstName='${mentee.FirstName}',  
@@ -95,19 +118,20 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                         CountTrialUnitsForWeek='${mentee.CountTrialUnitsForWeek}', 
                         CountTrialLessonsForSixMonths='${mentee.CountTrialLessonsForSixMonths}', 
                         CountConstantUnits='${mentee.CountConstantUnits}',
-                        LastUpdate='${getDateNow()}',
-                        Status='${Status}' 
-                        WHERE MenteeId='${mentee.MenteeId}' AND 
+                        LastUpdate='${getDateNow()}'
+                        WHERE MenteeId='${mentee.Id}' AND 
                         (LastName<>'${mentee.LastName}' OR FirstName<>'${mentee.FirstName}' 
                         OR Disciplines<>'${mentee.Disciplines}' OR CountAllEdUnits<>'${mentee.CountAllEdUnits}' 
                         OR CountTrialUnitsForWeek<>'${mentee.CountTrialUnitsForWeek}' OR CountConstantUnits<>'${mentee.CountConstantUnits}'
-                        OR CountTrialLessonsForSixMonths<>'${mentee.CountTrialLessonsForSixMonths}' OR Status<>'${Status}')`
+                        OR CountTrialLessonsForSixMonths<>'${mentee.CountTrialLessonsForSixMonths}')`
                     } else {
+                        // Удаление ID из списка. Нужно для определения ID тех, кто вышел из-под менторства (они останутся нетронутыми)
+                        UserIds_EXISTING_MENTEES = UserIds_EXISTING_MENTEES.filter(id => id != mentee.Id)
                         SQL_QUERY = `INSERT INTO mentees (MenteeId, LastName, FirstName, Disciplines, CountAllEdUnits, 
-                        CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, CountConstantUnits, LastUpdate, Status) 
-                        VALUES ('${mentee.MenteeId}', '${mentee.LastName}', '${mentee.FirstName}', '${mentee.Disciplines}', 
+                        CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, CountConstantUnits, LastUpdate) 
+                        VALUES ('${mentee.Id}', '${mentee.LastName}', '${mentee.FirstName}', '${mentee.Disciplines}', 
                         '${mentee.CountAllEdUnits}', '${mentee.CountTrialUnitsForWeek}', '${mentee.CountTrialLessonsForSixMonths}', 
-                        '${mentee.CountConstantUnits}', '${getDateNow()}', '${Status}')`
+                        '${mentee.CountConstantUnits}', '${getDateNow()}')`
                     }
 
                     connectionDB.query(SQL_QUERY, (error, result) => {
@@ -116,7 +140,20 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                             if (result.affectedRows > 0) { changedRows++; }
 
                             if (index == DATALIST_FORTRACKING.length - 1) {
-                                response.status(200).send(`Обновлено записей: ${changedRows}`)
+
+                                if (UserIds_EXISTING_MENTEES.length) {
+                                    const SQL_QUERY_FORDELETE = `DELETE FROM mentees WHERE MenteeId IN (${UserIds_EXISTING_MENTEES})`
+                                    let deletedRows = 0
+                                    connectionDB.query(SQL_QUERY_FORDELETE, (error, result) => {
+                                        if (error) { response.status(500).send('Ошибка базы данных') }
+                                        else {
+                                            deletedRows = result.affectedRows
+                                            response.status(200).send(`Обновлено записей: ${changedRows} Удалено записей: ${deletedRows}`)
+                                        }
+                                    })
+                                } else {
+                                    response.status(200).send(`Обновлено записей: ${changedRows}`)
+                                }
                             }
                         }
                     })

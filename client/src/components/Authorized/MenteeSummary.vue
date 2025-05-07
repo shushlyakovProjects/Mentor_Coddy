@@ -24,16 +24,12 @@
                         <p>Всего менти на данный момент: {{ fields.countOfMentee }}</p>
                         <p>Всего постоянных учеников: {{ fields.countOfConstantUnits }}</p>
                     </div>
-                    <div class="summary_before">
-                        <h3>Дополнительно</h3>
-                        <p>Всего отправлено модулей на проверку: {{ fields.countOfPaidModules }}</p>
-                    </div>
                     <div class="summary__card">
                         <h3>Количество менти</h3>
                         <p>С постоянными учениками: {{ fields.countOfMenteeWithConstantUnits }}</p>
                         <p>Без постоянных учеников: {{ fields.countOfMenteeWithoutConstantUnits }}</p>
                         <p>Занятых: {{ (fields.countOfMenteeWithConstantUnits / fields.countOfMentee * 100).toFixed(2)
-                            }}%</p>
+                        }}%</p>
                     </div>
                 </div>
 
@@ -44,6 +40,8 @@
                         <p v-for="(item, index) in getAddedMenteeList">* {{ item.LastName }} {{ item.FirstName }}
                             <a :href='`https://coddy.t8s.ru/Profile/${item.Id}`' target="_blank">CRM</a>
                         </p>
+                        <p class="small" v-show="!getAddedMenteeList.length">С последней загрузки менти в базу -
+                            изменений нет</p>
                     </div>
 
                     <div class="summary__card">
@@ -51,8 +49,9 @@
                         <p v-for="(item, index) in getExcludedMenteeList">
                             * {{ item.LastName }} {{ item.FirstName }}
                             <a :href='`https://coddy.t8s.ru/Profile/${item.MenteeId}`' target="_blank">CRM</a>
-                            ({{ item.Status }})
                         </p>
+                        <p class="small" v-show="!getExcludedMenteeList.length">С последней загрузки менти в базу -
+                            изменений нет</p>
                     </div>
 
                     <div class="loading" v-if="!fields.countOfMentee"></div>
@@ -62,16 +61,13 @@
                 <div class="summary_wrapper-item">
                     <div class="summary__card">
                         <h3>Отчет за неделю</h3>
-                        <p>Предыдущая сводка: {{ getPreviousSummaryWeekly.DateOfUpdate }}</p>
+                        <p>Предыдущая фиксация: {{ getPreviousSummaryWeekly.DateOfUpdate }}</p>
                     </div>
                     <div class="summary__card">
-                        <p>Менти новых: {{ getAddedMenteeList.length }}</p>
-                        <p>Получено учеников: {{ getDifference(getPreviousSummaryWeekly.CountOfConstantUnits,
-                            fields.countOfConstantUnits) }}</p>
-                        <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryWeekly.СountOfNewTrials
-                        }}
-                        </p>
-                        <p>Отправлено модулей: {{ getPreviousSummaryWeekly.CountOfPaidModules }}</p>
+                        <p>Количество новичков: {{ getDifference(getPreviousSummaryWeekly.CountOfMentee, fields.countOfMentee) }}</p>
+                        <p>Получено учеников: {{ getDifference(getPreviousSummaryWeekly.CountOfConstantUnits,fields.countOfConstantUnits) }}</p>
+                        <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryWeekly.СountOfNewTrials}}</p>
+                        <p>Завершено модулей: {{ fields.countOfPaidModules }}</p>
                     </div>
                 </div>
 
@@ -79,18 +75,13 @@
                 <div class="summary_wrapper-item">
                     <div class="summary__card">
                         <h3>Отчет за месяц</h3>
-                        <p>Предыдущая сводка: {{ getPreviousSummaryMonthly.DateOfUpdate }}</p>
+                        <p>Предыдущая фиксация: {{ getPreviousSummaryMonthly.DateOfUpdate }}</p>
                     </div>
                     <div class="summary__card">
-                        <p>Менти новых: {{ getAddedMenteeList.length }}</p>
-                        <p>Получено учеников: {{
-                            getDifference(getPreviousSummaryMonthly.CountOfConstantUnits, fields.countOfConstantUnits)
-                            }}
-                        </p>
-                        <p>Проведено пробников: {{ fields.countOfNewTrials -
-                            getPreviousSummaryMonthly.СountOfNewTrials }}
-                        </p>
-                        <p>Отправлено модулей: {{ getPreviousSummaryMonthly.CountOfPaidModules }}</p>
+                        <p>Количество новичков: {{ getDifference(getPreviousSummaryMonthly.CountOfMentee, fields.countOfMentee)  }}</p>
+                        <p>Получено учеников: {{getDifference(getPreviousSummaryMonthly.CountOfConstantUnits, fields.countOfConstantUnits)}}</p>
+                        <p>Проведено пробников: {{ fields.countOfNewTrials -getPreviousSummaryMonthly.СountOfNewTrials }}</p>
+                        <p>Завершено модулей: {{ fields.countOfPaidModules - getPreviousSummaryMonthly.CountOfPaidModules }}</p>
                     </div>
                 </div>
             </div>
@@ -138,11 +129,12 @@ export default {
         getSummaryFromDataBase() {
             this.$store.dispatch('downloadSummaryFromDataBase')
         },
-        uploadToDataBaseForSummary(period) {
+        async uploadToDataBaseForSummary(period) {
             const { countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules } = this.fields
             const data = { period, countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules }
             if (confirm('Уверены, что хотите начать отсчет с текущего дня?')) {
-                this.$store.dispatch('uploadToDataBaseForSummary', data)
+                await this.$store.dispatch('uploadToDataBaseForSummary', data)
+                await this.$store.dispatch('downloadSummaryFromDataBase')
             }
 
         },
@@ -167,7 +159,7 @@ export default {
                 }
 
                 // Если обратная связь данного менти найдена в БД. То достаем данные
-                let hisFeedbak = this.getFeedbackList.find((feedback) => feedback.FIO.includes(mentee.LastName))
+                let hisFeedbak = this.getFeedbackList.findLast((feedback) => feedback.FIO.includes(mentee.LastName))
                 if (hisFeedbak != undefined) {
                     this.fields.countOfPaidModules += hisFeedbak.CountPaidModules
                 }

@@ -79,7 +79,7 @@ button {
     cursor: pointer;
     background: var(--color_accent_lightBlue);
     color: var(--color_background-2_white);
-    margin-top: 10px;
+    /* margin-top: 10px; */
 }
 
 input[type='reset']:hover,
@@ -90,7 +90,7 @@ button:hover {
 
 input[type='reset']:focus,
 input[type='submit']:focus,
-button:focus{
+button:focus {
     background-color: var(--color_accent_pink);
 }
 

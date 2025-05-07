@@ -5,13 +5,15 @@
             <header ref="summary_header">
                 <div>
                     <h2>Обратная связь от менти</h2>
+                    <p>Найдено: {{ FEEDBACK_LIST.length }}</p>
                 </div>
 
                 <nav>
                     <div class="filtres-wrapper">
                         <transition name="filterBtn">
-                            <img @click="getMenteeData()" class="likeButton icon" src="../../../public/img/delete.svg"
-                                title="Очистить фильтры" alt="Отмена" v-show="filterIsOpen">
+                            <img @click="getFeedbackFromDatabase()" class="likeButton icon"
+                                src="../../../public/img/delete.svg" title="Очистить фильтры" alt="Отмена"
+                                v-show="filterIsOpen">
                         </transition>
 
                         <button title="Настройка фильтров" @click="filterIsOpen = !filterIsOpen">Фильтры</button>
@@ -25,19 +27,22 @@
                                 <div class="filtres__item">
                                     <p class="small">Сортировка</p>
                                     <div id="filter3">
-                                        <label class="small" for="filter3_asc">Сначала старые<input id="filter3_asc" type="radio"
-                                                value="asc" name="sortOfEdUnits" v-model="filter.sortOfEdUnits"></label>
-                                        <label class="small" for="filter3_desc">Сначала новые<input id="filter3_desc" type="radio"
-                                                value="desc" name="sortOfEdUnits"
-                                                v-model="filter.sortOfEdUnits"></label>
+                                        <label class="small" for="filter3_asc">Сначала старые</label>
+                                        <input id="filter3_asc" type="radio" value="asc" name="sortByDate"
+                                            v-model="filter.sortByDate">
+                                        <label class="small" for="filter3_desc">Сначала новые</label>
+                                        <input id="filter3_desc" type="radio" value="desc" name="sortByDate"
+                                            v-model="filter.sortByDate">
                                     </div>
                                 </div>
                                 <div class="filtres__item">
                                     <p class="small">Дата ОС</p>
                                     <div id="filter4">
-                                        <input id="filter4_asc" type="date" name="sortOfWorkTime"
+                                        <label class="small" for="filter4_from">С </label>
+                                        <input id="filter4_from" type="date" name="filterByDate"
                                             v-model="filter.filterByDate.from">
-                                        <input id="filter4_desc" type="date" name="sortOfWorkTime"
+                                        <label class="small" for="filter4_to">По </label>
+                                        <input id="filter4_to" type="date" name="filterByDate"
                                             v-model="filter.filterByDate.to">
                                     </div>
                                 </div>
@@ -50,7 +55,10 @@
                     </div>
 
                     <button @click="$router.push('/mentee/feedback')" title="Просмотр формы сбора ОС">Форма</button>
-                    <button @click="" title="Удалить выбранные" v-show="checkedList.length != 0">Удалить</button>
+                    <button @click="deleteCheckedFeedback()" title="Удалить выбранные"
+                        v-show="checkedList.length != 0">Удалить</button>
+                    <img @click="getFeedbackFromDatabase(true)" class="likeButton icon" src="../../../public/img/update.svg"
+                        title="Обновить данные" alt="Обновить">
                 </nav>
             </header>
 
@@ -74,7 +82,7 @@
                 </div>
 
                 <div class="feedback_wrapper-flex">
-                    <div class="feedback_row" v-for="(item, index) in getFeedbackList">
+                    <div class="feedback_row" v-for="(item, index) in FEEDBACK_LIST">
                         <p class="small">{{ item.FeedBackID }}</p>
                         <p class="small">{{ formatDate(item.Date) }}</p>
                         <p class="small">{{ item.FIO }}</p>
@@ -89,18 +97,20 @@
                         }">{{ item.NewLoad }}</p>
                         <p class="small onHover">{{ item.Comments }}</p>
                         <p class="small">{{ item.HasConstantUnit }}</p>
-                        <p class="small">{{ item.HasConstantUnit == 'да' ? item.CountConstantUnits : '-' }}</p>
-                        <p class="small">{{ item.HasConstantUnit != 'да' ? item.CountPaidModules : '-' }}</p>
-                        <p class="small">{{ item.HasConstantUnit != 'да' ? item.CountTrialUnits : '-' }}</p>
-                        <p class="small">
+                        <p class="small">{{ item.HasConstantUnit == 'Да' ? item.CountConstantUnits : '-' }}</p>
+                        <p class="small">{{ item.HasConstantUnit == 'Да' ? item.CountPaidModules : '-' }}</p>
+                        <p class="small">{{ item.HasConstantUnit != 'Да' ? item.CountTrialUnits : '-' }}</p>
+                        <nav>
                             <label :for="item.FeedBackID" class="checkbox-btn">
                                 <input type="checkbox" :id="item.FeedBackID" :value="item.FeedBackID"
                                     v-model="checkedList">
                             </label>
-                        </p>
+                        </nav>
                     </div>
                 </div>
             </div>
+
+            <div class="loading" v-if="!FEEDBACK_LIST.length"></div>
 
             <!-- ДОБАВИТЬ ОЧИСТКУ ОС -->
 
@@ -115,37 +125,58 @@ import { mapGetters } from 'vuex';
 export default {
     data() {
         return {
+            FEEDBACK_LIST: [],
             checkedList: [],
 
             filterIsOpen: false,
             filter: {
                 fioInclude: '',
                 sortByDate: '',
-                filterByDate: {from: '', to: ''},
+                filterByDate: { from: '', to: '' },
             }
         }
     },
     mounted() {
         this.getFeedbackFromDatabase()
+        document.addEventListener('click', (e) => {
+            if (this.filterIsOpen) {
+                if (!e.target.closest('.filtres-wrapper')) {
+                    this.filterIsOpen = false
+                }
+            }
+        })
     },
     computed: { ...mapGetters(['getFeedbackList']) },
+    watch: {
+        getFeedbackList() {
+            this.FEEDBACK_LIST = this.getFeedbackList
+        }
+    },
     methods: {
-        getFeedbackFromDatabase() {
-            this.$store.dispatch('downloadFeedbackFromDatabase')
+        getFeedbackFromDatabase(force = false) {
+            this.filter = {
+                fioInclude: '',
+                sortByDate: '',
+                filterByDate: { from: '', to: '' },
+            }
+            this.FEEDBACK_LIST = this.getFeedbackList
+            if (this.getFeedbackList.length == 0 || force) { this.$store.dispatch('downloadFeedbackFromDatabase') }
         },
         formatDate(origDate) {
             const date = new Date(origDate)
             const min = (date.getMinutes() < 10) ? '0' + date.getMinutes() : date.getMinutes()
             const hour = (date.getHours() < 10) ? '0' + date.getHours() : date.getHours()
             const day = (date.getDate() < 10) ? '0' + date.getDate() : date.getDate()
-            const month = (date.getMonth() < 10) ? '0' + date.getMonth() : date.getMonth()
+            const month = (date.getMonth() + 1 < 10) ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
             const year = date.getFullYear()
             return `${day}.${month}.${year} ${hour}:${min}`
         },
         filterStart() {
-            // this.MENTEE_LIST = this.$store.getters.getMenteeListWithFiltres(this.filter)
-            // ДОНАСТРОИТЬ ФИЛЬТРЫ
+            this.FEEDBACK_LIST = this.$store.getters.getFeedbackListWithFiltres(this.filter)
         },
+        deleteCheckedFeedback() {
+            this.$store.dispatch('deleteCheckedFeedbackFromDatabase', this.checkedList)
+        }
     }
 }
 </script>
@@ -209,10 +240,17 @@ export default {
     gap: 5px;
 }
 
+.feedback_row nav {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    padding: 10px 0;
+}
+
 .checkbox-btn {
     background-color: var(--color_background-2_white);
     box-shadow: 0px 0px 0px 2px inset var(--color_accent_darkBlue);
-    width: 80%;
+    width: 50%;
     aspect-ratio: 1/1;
     display: block;
     border-radius: 50%;
@@ -245,7 +283,6 @@ export default {
 }
 
 .filtres-wrapper .likeButton {
-    margin-top: 10px;
     margin-right: 10px;
     padding: 3px;
     opacity: 0.7;
@@ -286,6 +323,15 @@ export default {
     border: 1px solid var(--color_background-2_white);
     border-radius: 10px;
     margin: 5px;
+}
+
+#filter3,
+#filter4 {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: repeat(2, 1fr);
+    gap: 5px;
+    align-items: center;
 }
 
 /* Настройка анимации в блоке фильтров */
