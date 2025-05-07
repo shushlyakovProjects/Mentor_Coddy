@@ -132,7 +132,9 @@ export default {
         async uploadToDataBaseForSummary(period) {
             const { countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules } = this.fields
             const data = { period, countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules }
-            if (confirm('Уверены, что хотите начать отсчет с текущего дня?')) {
+            const period_RU = period == 'weekly' ? 'недели' : 'месяца'
+
+            if (confirm(`Уверены, что хотите начать отсчет ${period_RU} с текущего дня?`)) {
                 await this.$store.dispatch('uploadToDataBaseForSummary', data)
                 await this.$store.dispatch('downloadSummaryFromDataBase')
             }

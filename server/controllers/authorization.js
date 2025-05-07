@@ -45,11 +45,6 @@ function authorization(request, response) {
         // Достаем данные из запроса
         const { Email, Password } = request.body
 
-        // const salt = bcrypt.genSaltSync(5) // Генерируем соль
-        // const hashPass = bcrypt.hashSync(Password, salt) // Хешируем пароль
-        // console.log(hashPass);
-
-
         // Подготавливаем SQL-запрос на проверку существования пользователя
         const SQL_QUERY = `SELECT * FROM users WHERE Email = '${Email}'`
 

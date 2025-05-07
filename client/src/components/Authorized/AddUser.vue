@@ -35,8 +35,8 @@
                     <select placeholder="Укажите роль" v-model="infoNewUser.Role" required>
                         <option value="" selected disabled hidden>Укажите уровень доступа</option>
                         <option value="admin">Администратор</option>
-                        <option value="moderator">Модератор</option>
                         <option value="mentor">Ментор</option>
+                        <option value="reader">Читатель</option>
                     </select>
                 </div>
 

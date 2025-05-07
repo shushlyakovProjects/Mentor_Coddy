@@ -13,7 +13,7 @@ export default {
             if (data.period == 'weekly') { context.commit('updateMessageSuccess', { info: 'Начало недельного отсчета...', isReady: false }) }
             if (data.period == 'monthly') { context.commit('updateMessageSuccess', { info: 'Начало месячного отсчета...', isReady: false }) }
 
-            await axios.post('/server/from-admin/uploadToDataBaseForSummary', { data })
+            await axios.post('/server/from-mentor/uploadToDataBaseForSummary', { data })
                 .then((result) => { context.commit('updateMessageSuccess', { info: 'Сводка загружена в базу успешно!', isReady: true }) })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },

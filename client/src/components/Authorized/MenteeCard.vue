@@ -56,7 +56,7 @@
                             <p class="small feedback_box" v-if="currentFeedback == undefined">Отсутсвует</p>
                             <span class="feedback_box" v-if="currentFeedback != undefined">
                                 <p class="small">Последняя отправка: {{ formatDate(currentFeedback.Date) }}</p>
-                                <p class="small">Проверка норм: {{ currentFeedback.CheckInfo }}</p>
+                                <p class="small">Проверка нормативов: {{ currentFeedback.CheckInfo }}</p>
                                 <p class="small">Набор нагрузки: {{ currentFeedback.NewLoad }}</p>
                                 <p class="small">{{ currentFeedback.CountConstantUnits>0 ? 'Ведет постоянных учеников: '+currentFeedback.CountConstantUnits : 'Ведет пробные уроки' }}</p>
                                 <p class="small">Завершено модулей: {{ currentFeedback.CountPaidModules }}</p>
