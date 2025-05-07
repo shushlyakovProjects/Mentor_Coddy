@@ -4,9 +4,17 @@ import axios from 'axios';
 export default {
     actions: {
         async downloadFeedbackFromDatabase(context) {
-            this.commit('updateMessageSuccess', { info: 'Загрузка данных...', isReady: false })
+            if (context.state.FEEDBACK_LIST.length == 0) { this.commit('updateMessageSuccess', { info: 'Загрузка данных...', isReady: false }) }
             await axios.post('/server/from-mentor/downloadFeedbackFromDatabase')
                 .then((result) => { context.commit('updateFeedbackList', result.data) })
+                .catch((error) => { context.commit('updateMessageError', error.response.data) })
+        },
+        async deleteCheckedFeedbackFromDatabase(context, checkedList) {
+            await axios.post('/server/from-admin/deleteCheckedFeedbackFromDatabase', { checkedList })
+                .then((result) => {
+                    context.commit('updateMessageSuccess', { info: result.data, isReady: true })
+                    this.dispatch('downloadFeedbackFromDatabase')
+                })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
         async downloadMenteeData(context) {
@@ -34,29 +42,32 @@ export default {
         async uploadToDataBaseForTracking(context, MENTEE_LIST) {
 
             let DATALIST_FORTRACKING = []
-            this.MENTEE_LIST.forEach((mentee, index) => {
+            MENTEE_LIST.forEach((mentee, index) => {
                 // Постоянные ученики, Пробные уроки, Завершенные модули
-                const { Status, Disciplines, FirstName, LastName, Id } = mentee
+                const { Disciplines, FirstName, LastName, Id } = mentee
                 const { CountAllEdUnits, CountConstantUnits, CountTrialUnitsForWeek, CountTrialLessonsForSixMonths } = mentee.InfoEdUnits
                 let DATA_FORTRACKING = {
                     Id, LastName, FirstName, Disciplines, CountAllEdUnits,
-                    CountConstantUnits, CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, Status
+                    CountConstantUnits, CountTrialUnitsForWeek, CountTrialLessonsForSixMonths
                 }
                 DATALIST_FORTRACKING.push(DATA_FORTRACKING)
             })
 
             await axios.post('/server/from-admin/uploadToDataBaseForTracking', { DATALIST_FORTRACKING })
-                .then((result) => { this.commit('updateMessageSuccess', result.data) })
-                .catch((error) => { this.commit('updateMessageError', error.response.data) })
+                .then((result) => { context.commit('updateMessageSuccess', { info: result.data, isReady: true }) })
+                .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
     },
     mutations: {
         updateFeedbackList(state, newData) {
+            if (state.FEEDBACK_LIST.length != newData.length) { this.commit('updateMessageSuccess', { info: 'Обратная связь получена успешно!', isReady: true }) }
             state.FEEDBACK_LIST = newData
-            this.commit('updateMessageSuccess', { info: 'Обратная связь получена успешно!', isReady: true })
         },
         updateMenteeList(state, newData) {
             state.MENTEE_LIST = newData
+            state.MENTEE_LIST.forEach((mentee) => {
+                mentee.Feedback = state.FEEDBACK_LIST.findLast((feedback) => feedback.FIO.includes(mentee.LastName))
+            })
             this.commit('updateMessageSuccess', { info: 'Данные менти получены успешно!', isReady: true })
         },
         addTrialLessonsToMenteeList(state, TRIALS_LIST) {
@@ -104,12 +115,38 @@ export default {
     },
     getters: {
         getFeedbackList(state) { return state.FEEDBACK_LIST },
+        getFeedbackListWithFiltres: (state) => (filtres) => {
+            const { fioInclude, sortByDate, filterByDate } = filtres
+            let filtredList = []
+
+            filtredList = state.FEEDBACK_LIST.filter((elem) => {
+                let check1 = elem.FIO.toLowerCase().includes(fioInclude.toLowerCase())
+
+                let check2 = true
+                if (filterByDate.from && filterByDate.to) {
+                    check2 = new Date(elem.Date) >= new Date(filterByDate.from) && new Date(elem.Date) <= new Date(filterByDate.to)
+                } else {
+                    if (filterByDate.from) { check2 = new Date(elem.Date) >= new Date(filterByDate.from) }
+                    if (filterByDate.to) { check2 = new Date(elem.Date) <= new Date(filterByDate.to) }
+                }
+
+
+                return check1 && check2
+            })
+
+            if (sortByDate == 'asc') { filtredList.sort((a, b) => new Date(b.Date) - new Date(a.Date)) }
+            if (sortByDate == 'desc') { filtredList.sort((a, b) => new Date(a.Date) - new Date(b.Date)) }
+
+            return filtredList
+        },
+
+
         getMessages(state) { return state.messages },
         getAddedMenteeList(state) { return state.ADDED_MENTEE_LIST },
         getExcludedMenteeList(state) { return state.EXCLUDED_MENTEE_LIST },
         getMenteeList(state) { return state.MENTEE_LIST },
         getMenteeListWithFiltres: (state) => (filtres) => {
-            const { menteesOfShushlyakov, disciplines, fioInclude, workDays, sortOfEdUnits, sortOfWorkTime } = filtres
+            const { feedbackDate, menteesOfShushlyakov, disciplines, fioInclude, workDays, sortOfEdUnits, sortOfWorkTime } = filtres
             let filtredList = []
 
             filtredList = state.MENTEE_LIST.filter((elem) => {
@@ -121,7 +158,10 @@ export default {
 
                 let check4 = elem.Disciplines != undefined ? elem.Disciplines.join(', ').includes(disciplines) : true
 
-                return check1 && check2 && check3 && check4
+
+                let check5 = feedbackDate ? elem.Feedback != undefined ? new Date(elem.Feedback.Date) >= new Date(feedbackDate) : false : true
+
+                return check1 && check2 && check3 && check4 && check5
             })
 
             if (sortOfEdUnits == 'asc') { filtredList.sort((a, b) => a.InfoEdUnits.CountAllEdUnits - b.InfoEdUnits.CountAllEdUnits) }

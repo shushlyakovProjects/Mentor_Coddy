@@ -229,7 +229,6 @@ export default {
                 this.message.error = ''
                 await axios.post('/server/from-mentee/newFeedback', FeedBack)
                     .then((result) => {
-                        console.log(result);
                         this.message.success = result.data
                         localStorage.setItem('FIO', FIO);
                         localStorage.setItem('Phone', Phone);

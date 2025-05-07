@@ -22,7 +22,7 @@ export default {
         updatePreviousSummary(state, newInfo) {
             state.PREVIOUS_SUMMARY_WEEKLY = newInfo.prev_summary_weekly[0]
             state.PREVIOUS_SUMMARY_MONTHLY = newInfo.prev_summary_monthly[0]
-            this.commit('updateMessageSuccess', { info: 'Ежендельная сводка получена успешно!', isReady: true })
+            this.commit('updateMessageSuccess', { info: 'Сводка получена успешно!', isReady: true })
         },
         updateMessageError(state, info) {
             this.commit('updateMessageSuccess', { info: '', isReady: true })

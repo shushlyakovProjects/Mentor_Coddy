@@ -56,6 +56,12 @@
                                         <input type="text" placeholder="До" maxlength="3" v-model="filter.workDays.max">
                                     </div>
                                 </div>
+                                <div class="filtres__item">
+                                    <p class="small">ОС не позже</p>
+                                    <div id="filter5">
+                                        <input type="date" v-model="filter.feedbackDate">
+                                    </div>
+                                </div>
                                 <label for="filter6" class="filtres__item">
                                     <p class="small">Ментор Шушляков Н</p>
                                     <input type="checkbox" id="filter6" v-model="filter.menteesOfShushlyakov">
@@ -74,7 +80,7 @@
                         title="Отслеживать динамику с текущего момента"
                         :data-lastupdate="lastUpdate ? `Посл загр ${lastUpdate}` : `Загрузка...`">Загрузить
                         в базу</button>
-                    <button @click=" getEveryTrialLesson()" title="Получить все проведенные пробные уроки за полгода"
+                    <button @click="getEveryTrialLesson()" title="Получить все проведенные пробные уроки за полгода"
                         v-if="MENTEE_LIST.length != 0">Получить ПУ за полгода</button>
                 </nav>
             </header>
@@ -117,11 +123,38 @@
                             :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
                             Дисциплин:
                             {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
+                        <p class="small" v-if="item.Feedback"
+                            :class="getBackLight(item.Feedback.CountPaidModules != undefined ? item.Feedback.CountPaidModules : 0)">
+                            Завершено модулей:
+                            {{ item.Feedback ? item.Feedback.CountPaidModules : 'Отсутсвует' }}. ≈{{
+                                item.Feedback.CountPaidModules > 0 ? item.Feedback.CountPaidModules * 6 : '' }}ч</p>
                     </div>
+
+                    <div>
+                        <p class="small"
+                            :class="getBackLight(0, item.Feedback ? formatDate(item.Feedback.Date) : 'Отсутсвует')">
+                            ОС:
+                            {{ item.Feedback ? formatDate(item.Feedback.Date) : 'Отсутсвует' }}
+                        </p>
+                        <p class="small" v-if="item.Feedback"
+                            :class="getBackLight(0, item.Feedback.CountConstantUnits > 0 ? 'Ведет постоянных' : 'Ведет пробные')">
+                            Нормативы:
+                            {{ item.Feedback.CountConstantUnits > 0 ? 'Ведет постоянных' : 'Ведет пробные' }}</p>
+                        <p class="small" v-if="item.Feedback"
+                            :class="getBackLight(0, item.Feedback ? item.Feedback.CheckInfo : '')">
+                            Нормативы:
+                            {{ item.Feedback ? item.Feedback.CheckInfo : '' }}</p>
+                    </div>
+
                     <nav>
                         <p class="errorMessage"
                             v-show="!item.hasOwnProperty('PhotoUrls') || !item.hasOwnProperty('JobOrStudyPlace')"
                             title="СРМ заполнен не полностью">❗️</p>
+
+                        <p title="ОС отсутсвует">{{ item.Feedback == undefined ? '❌' : '' }}</p>
+                        <p title="ОС получена">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) >= new Date() - (10 * 24 * 60 * 60 * 1000) ? '✅' :'': '' }}</p>
+                        <p title="ОС устарела">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) < new Date() - (10 * 24 * 60 * 60 * 1000) ? '⌛️' :'': '' }}</p>
+       
                         <a :href='`https://coddy.t8s.ru/Profile/${item.Id}`' title="Открыть CRM пользователя"
                             target="_blank">
                             <img class="icon" src="../../../public/img/CRM_profile.svg" alt="CRM">
@@ -158,11 +191,12 @@ export default {
                 sortOfEdUnits: '', // asc - desc
                 sortOfWorkTime: '', // asc - desc
                 workDays: { min: 0, max: 360 },
-                backLight: false
+                backLight: false,
+                feedbackDate: ''
             },
         }
     },
-    computed: { ...mapGetters(['getMenteeList']) },
+    computed: { ...mapGetters(['getMenteeList', 'getFeedbackList']) },
     watch: {
         getMenteeList() {
             this.MENTEE_LIST = this.getMenteeList
@@ -173,6 +207,7 @@ export default {
     },
     mounted() {
         this.getMenteeData()
+        if (this.getFeedbackList.length == 0) { this.$store.dispatch('downloadFeedbackFromDatabase') }
         const header = document.querySelector('.menteeList_header')
         document.addEventListener('scroll', (event) => {
             if (window.scrollY > 50) {
@@ -218,11 +253,23 @@ export default {
             const numberWorkDays = Math.round((now - date) / 1000 / 60 / 60 / 24)
             return numberWorkDays
         },
-        getBackLight(info) {
+        getBackLight(info, text) {
             if (this.filter.backLight) {
-                if (info == 0) { return 'backlight_red-1' }
-                else if (info > 0 && info < 5) { return 'backlight_yellow-1' }
-                else if (info >= 5) { return 'backlight_green-1' }
+                if (text) {
+                    if (text == 'Отсутсвует' || text == 'Нужна помощь') {
+                        return 'backlight_red-1'
+                    }
+                    else if (text == 'Ведет пробные') {
+                        return 'backlight_yellow-1'
+                    }
+                    else {
+                        return 'backlight_green-1'
+                    }
+                } else {
+                    if (info == 0) { return 'backlight_red-1' }
+                    else if (info > 0 && info < 5) { return 'backlight_yellow-1' }
+                    else if (info >= 5) { return 'backlight_green-1' }
+                }
             }
         },
         getDifference(dataNow = 0, dataOld = 0) {
@@ -265,8 +312,8 @@ header nav {
     border: 1px solid var(--color_accent_gray);
     padding: 5px 10px;
     display: grid;
-    grid-template-columns: 30px 1fr 2fr 2fr 2fr 50px;
-    align-items: center;
+    grid-template-columns: 30px 100px 160px 160px 200px 1fr 50px;
+    align-items: start;
     overflow-wrap: anywhere;
     gap: 20px;
     transition-duration: 0.3s;
@@ -276,6 +323,7 @@ header nav {
 .mentee__item nav {
     display: flex;
     justify-content: end;
+    align-items: center;
     gap: 3px;
 }
 
@@ -296,7 +344,6 @@ header nav {
 }
 
 .filtres-wrapper .likeButton {
-    margin-top: 10px;
     margin-right: 10px;
     padding: 3px;
     opacity: 0.7;
@@ -402,10 +449,7 @@ header nav {
     justify-content: end;
 }
 
-#filter5 input {
+#filter5 input[type='text'] {
     width: 50px;
 }
-
-
-
 </style>

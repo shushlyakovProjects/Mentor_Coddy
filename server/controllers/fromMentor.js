@@ -43,7 +43,7 @@ router.post('/downloadSummaryFromDataBase', async (request, response) => {
         }
 
         // Получение сводки сначала за неделю
-        const SQL_QUERY_WEEKLY = `SELECT * FROM summary_weekly ORDER BY DateOfUpdate DESC LIMIT 1`
+        const SQL_QUERY_WEEKLY = `SELECT * FROM summary_weekly ORDER BY SummaryId DESC LIMIT 1`
         connectionDB.query(SQL_QUERY_WEEKLY, (err, result) => {
             if (err) { response.status(500).send('Ошибка базы данных') }
             else {
@@ -117,16 +117,14 @@ router.post('/downloadMenteeData', async (request, response) => {
         await axios.post(CRM_URL + `/GetTeachers`, null, { params: { authkey: authkey_getTeachers, take: 2000 } })
             .then(async (result) => {
                 const TEACHERS_LIST = result.data.Teachers
-                const MENTEES_LIST = []
-                const UserIds_MENTEES_LIST = []
+                let MENTEES_LIST = []
+                let UserIds_MENTEES_LIST = []
 
                 // Очистка массива со всеми преподавателями, получение ТОЛЬКО МЕНТИ
-                TEACHERS_LIST.forEach(element => {
-                    if (element.Status == 'Под менторством') {
-                        MENTEES_LIST.push(element)
-                        UserIds_MENTEES_LIST.push(element.Id)
-                    }
-                });
+                MENTEES_LIST = TEACHERS_LIST.filter((elem) => elem.Status == 'Под менторством')
+
+                // Получение массива идентификаторов менти
+                TEACHERS_LIST.forEach(element => { UserIds_MENTEES_LIST.push(element.Id) });
 
                 console.log(`Получено ${TEACHERS_LIST.length} преподавателей`);
                 console.log(`Из них ${MENTEES_LIST.length} находятся под менторством`);
@@ -165,7 +163,7 @@ router.post('/downloadMenteeData', async (request, response) => {
                                         CountConstantUnits: 0,
                                     }
 
-                                    // Определение новых и выпущенных менти
+                                    // Определение новых менти
                                     mentee.PrevBrief = menteeFromDataBase.find((infoFromDB) => { return infoFromDB.MenteeId == mentee.Id })
                                     if (mentee.PrevBrief == undefined) { added_mentee.push(mentee) }
                                     if (mentee.PrevBrief != undefined) { menteeFromDataBase.splice(menteeFromDataBase.findIndex(menteeFromDB => menteeFromDB.MenteeId == mentee.Id), 1) }
