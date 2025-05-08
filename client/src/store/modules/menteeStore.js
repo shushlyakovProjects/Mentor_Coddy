@@ -63,7 +63,7 @@ export default {
             state.FEEDBACK_LIST = newData
         },
         updateMenteeList(state, newData) {
-            state.MENTEE_LIST = newData
+            if (state.MENTEE_LIST.length == 0) { state.MENTEE_LIST = newData }
             state.MENTEE_LIST.forEach((mentee) => {
                 mentee.Feedback = state.FEEDBACK_LIST.findLast((feedback) => feedback.FIO.includes(mentee.LastName))
             })
@@ -150,7 +150,7 @@ export default {
 
             filtredList = state.MENTEE_LIST.filter((elem) => {
                 let check1 = menteesOfShushlyakov ? !state.menteesIsNotOfShushlyakov.includes(elem.LastName) : state.menteesIsNotOfShushlyakov.includes(elem.LastName)
-                let check2 = `${elem.LastName} ${elem.FirstName}`.toLowerCase().includes(fioInclude.toLowerCase())
+                let check2 = fioInclude ? `${elem.LastName} ${elem.FirstName}`.toLowerCase().includes(fioInclude.toLowerCase()) : true
 
                 let workDaysValue = Math.round((new Date() - new Date(elem.Created)) / 1000 / 60 / 60 / 24)
                 let check3 = workDaysValue >= workDays.min && workDaysValue <= workDays.max
