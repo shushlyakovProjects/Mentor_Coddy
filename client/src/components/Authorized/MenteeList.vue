@@ -22,81 +22,31 @@
                         <button title="Настройка фильтров" @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
                         <transition name="filterForm">
-                            <form class="filtres" v-show="filterIsOpen" v-on:submit.prevent="filterStart()">
-                                <div class="filtres__item">
-                                    <p class="small">ФИО</p>
-                                    <input type="text" v-model="filter.fioInclude" placeholder="Содержит...">
-                                </div>
-                                <div class="filtres__item">
-                                    <p class="small">Дисциплины</p>
-                                    <input type="text" v-model="filter.disciplines" placeholder="Преподает...">
-                                </div>
-                                <div class="filtres__item">
-                                    <p class="small">Количество учеников </p>
-                                    <div id="filter3">
-                                        <label for="filter3_asc">↗️<input id="filter3_asc" type="radio" value="asc"
-                                                name="sortOfEdUnits" v-model="filter.sortOfEdUnits"></label>
-                                        <label for="filter3_desc">↘️<input id="filter3_desc" type="radio" value="desc"
-                                                name="sortOfEdUnits" v-model="filter.sortOfEdUnits"></label>
-                                    </div>
-                                </div>
-                                <div class="filtres__item">
-                                    <p class="small">Длительность работы </p>
-                                    <div id="filter4">
-                                        <label for="filter4_asc">↗️<input id="filter4_asc" type="radio" value="asc"
-                                                name="sortOfWorkTime" v-model="filter.sortOfWorkTime"></label>
-                                        <label for="filter4_desc">↘️<input id="filter4_desc" type="radio" value="desc"
-                                                name="sortOfWorkTime" v-model="filter.sortOfWorkTime"></label>
-                                    </div>
-                                </div>
-                                <div class="filtres__item">
-                                    <p class="small">Дней работает </p>
-                                    <div id="filter5">
-                                        <input type="text" placeholder="От" maxlength="3" v-model="filter.workDays.min">
-                                        <input type="text" placeholder="До" maxlength="3" v-model="filter.workDays.max">
-                                    </div>
-                                </div>
-                                <div class="filtres__item">
-                                    <p class="small">ОС не позже</p>
-                                    <div id="filter5">
-                                        <input type="date" v-model="filter.feedbackDate">
-                                    </div>
-                                </div>
-                                <label for="filter6" class="filtres__item">
-                                    <p class="small">Ментор Шушляков Н</p>
-                                    <input type="checkbox" id="filter6" v-model="filter.menteesOfShushlyakov">
-                                </label>
-                                <label for="filter7" class="filtres__item">
-                                    <p class="small">Раскраска</p>
-                                    <input type="checkbox" id="filter7" v-model="filter.backLight">
-                                </label>
-
-                                <input type="submit" value="Применить">
-                            </form>
+                            <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart"
+                                @backLight="(value) => { backLight = value }"></MenteeListFilter>
                         </transition>
-
                     </div>
+
                     <button @click="uploadToDataBaseForTracking()" id="btn_uploadToDataBaseForTracking"
                         title="Отслеживать динамику с текущего момента"
                         :data-lastupdate="lastUpdate ? `Посл загр ${lastUpdate}` : `Загрузка...`">Загрузить
                         в базу</button>
+
                     <button @click="getEveryTrialLesson()" title="Получить все проведенные пробные уроки за полгода"
                         v-if="MENTEE_LIST.length != 0">Получить ПУ за полгода</button>
+
                 </nav>
             </header>
 
             <div class="mentee">
-                <div class="mentee__item" v-for="(item, index) in MENTEE_LIST" :key="index"
-                    @click="this.selectedMentee = item">
+                <div class="mentee__item" v-for="(item, index) in MENTEE_LIST" :key="index">
                     <div>{{ index + 1 }}.</div>
-                    <div>
+                    <div @click="this.selectedMentee = item" class="hover-bold">
                         <p class="small">{{ item.LastName }}</p>
                         <p class="small">{{ item.FirstName }}</p>
+                        <p class="verysmall">Всего: {{ getNumberWorkDays(item.Created) }} дней</p>
                     </div>
-                    <div>
-                        <p class="small">Работает с: {{ formatDate(item.Created) }}</p>
-                        <p class="small">Всего: {{ getNumberWorkDays(item.Created) }} дней</p>
-                    </div>
+
                     <div>
                         <p class="small" :class="getBackLight(item.InfoEdUnits.CountTrialUnitsForWeek)">
                             ПУ за неделю:
@@ -113,16 +63,16 @@
                         </p>
                     </div>
                     <div>
+                        <p class="small"
+                            :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
+                            Дисциплин:
+                            {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
                         <p class="small" :class="getBackLight(item.InfoEdUnits.CountConstantUnits)">
                             Постоянных учеников:
                             {{ item.InfoEdUnits.CountConstantUnits }}
                             ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountConstantUnits : 0,
                                 item.PrevBrief ? item.PrevBrief.CountConstantUnits : 0) }})
                         </p>
-                        <p class="small"
-                            :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
-                            Дисциплин:
-                            {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
                         <p class="small" v-if="item.Feedback"
                             :class="getBackLight(item.Feedback.CountPaidModules != undefined ? item.Feedback.CountPaidModules : 0)">
                             Завершено модулей:
@@ -138,12 +88,16 @@
                         </p>
                         <p class="small" v-if="item.Feedback"
                             :class="getBackLight(0, item.Feedback.CountConstantUnits > 0 ? 'Ведет постоянных' : 'Ведет пробные')">
-                            Нормативы:
                             {{ item.Feedback.CountConstantUnits > 0 ? 'Ведет постоянных' : 'Ведет пробные' }}</p>
                         <p class="small" v-if="item.Feedback"
                             :class="getBackLight(0, item.Feedback ? item.Feedback.CheckInfo : '')">
                             Нормативы:
                             {{ item.Feedback ? item.Feedback.CheckInfo : '' }}</p>
+                    </div>
+
+                    <div>
+                        <textarea class="comment-box" placeholder="Комментарий"
+                            :ref="'comment-box-' + item.Id"></textarea>
                     </div>
 
                     <nav>
@@ -152,13 +106,15 @@
                             title="СРМ заполнен не полностью">❗️</p>
 
                         <p title="ОС отсутсвует">{{ item.Feedback == undefined ? '❌' : '' }}</p>
-                        <p title="ОС получена">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) >= new Date() - (10 * 24 * 60 * 60 * 1000) ? '✅' :'': '' }}</p>
-                        <p title="ОС устарела">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) < new Date() - (10 * 24 * 60 * 60 * 1000) ? '⌛️' :'': '' }}</p>
-       
-                        <a :href='`https://coddy.t8s.ru/Profile/${item.Id}`' title="Открыть CRM пользователя"
-                            target="_blank">
-                            <img class="icon" src="../../../public/img/CRM_profile.svg" alt="CRM">
-                        </a>
+                        <p title="ОС получена">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) >= new
+                            Date() - (10 * 24 * 60 * 60 * 1000) ? '✅' : '' : '' }}</p>
+                        <p title="ОС устарела">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) < new Date()
+                            - (10 * 24 * 60 * 60 * 1000) ? '⌛️' : '' : '' }}</p>
+
+                                <a :href='`https://coddy.t8s.ru/Profile/${item.Id}`' title="Открыть CRM пользователя"
+                                    target="_blank">
+                                    <img class="icon" src="../../../public/img/CRM_profile.svg" alt="CRM">
+                                </a>
                     </nav>
                 </div>
 
@@ -172,28 +128,18 @@
 <script>
 import axios from 'axios';
 import MenteeCard from './MenteeCard.vue';
+import MenteeListFilter from '../UI/MenteeList-Filter.vue';
 import { mapGetters } from 'vuex';
 
 export default {
-    components: { MenteeCard },
+    components: { MenteeCard, MenteeListFilter },
     data() {
         return {
             MENTEE_LIST: [],
             selectedMentee: {},
             lastUpdate: '',
-
+            backLight: false,
             filterIsOpen: false,
-            filter: {
-                menteesOfShushlyakov: false, // Временный фильтр
-                disciplines: '',
-                fioInclude: '',
-                gender: '',
-                sortOfEdUnits: '', // asc - desc
-                sortOfWorkTime: '', // asc - desc
-                workDays: { min: 0, max: 360 },
-                backLight: false,
-                feedbackDate: ''
-            },
         }
     },
     computed: { ...mapGetters(['getMenteeList', 'getFeedbackList']) },
@@ -222,6 +168,9 @@ export default {
                     this.filterIsOpen = false
                 }
             }
+
+            // console.log(e.target);
+
         })
     },
     methods: {
@@ -237,13 +186,13 @@ export default {
             this.MENTEE_LIST = this.getMenteeList
             if (this.MENTEE_LIST.length == 0) { await this.$store.dispatch('downloadMenteeData') }
         },
-        filterStart() {
-            this.MENTEE_LIST = this.$store.getters.getMenteeListWithFiltres(this.filter)
+        filterStart(filter) {
+            this.MENTEE_LIST = this.$store.getters.getMenteeListWithFiltres(filter)
         },
         formatDate(origDate) {
             const date = new Date(origDate)
             const day = (date.getDate() < 10) ? '0' + date.getDate() : date.getDate()
-            const month = (date.getMonth() < 10) ? '0' + date.getMonth() : date.getMonth()
+            const month = (date.getMonth() < 10) ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)
             const year = date.getFullYear()
             return `${day}.${month}.${year}`
         },
@@ -254,7 +203,7 @@ export default {
             return numberWorkDays
         },
         getBackLight(info, text) {
-            if (this.filter.backLight) {
+            if (this.backLight) {
                 if (text) {
                     if (text == 'Отсутсвует' || text == 'Нужна помощь') {
                         return 'backlight_red-1'
@@ -312,12 +261,11 @@ header nav {
     border: 1px solid var(--color_accent_gray);
     padding: 5px 10px;
     display: grid;
-    grid-template-columns: 30px 100px 160px 160px 200px 1fr 100px;
+    grid-template-columns: 25px 100px 150px 200px 220px 1fr 100px;
     align-items: start;
     overflow-wrap: anywhere;
-    gap: 20px;
+    gap: 10px;
     transition-duration: 0.3s;
-    cursor: pointer;
 }
 
 .mentee__item nav {
@@ -331,8 +279,16 @@ header nav {
     background-color: var(--color_background-4_white);
 }
 
+.mentee__item:hover .hover-bold {
+    font-weight: bold;
+    cursor: pointer;
+}
 
-/* Настройка фильтров */
+
+.comment-box {}
+
+
+/* Фильтры, оболочка */
 .filtres-wrapper {
     position: relative;
     display: flex;
@@ -349,42 +305,6 @@ header nav {
     opacity: 0.7;
     transition-duration: 0.3s;
 }
-
-.filtres {
-    transition-property: 0.5s;
-
-    position: absolute;
-    background-color: var(--color_background-4_white);
-    box-shadow: 0 0 3px var(--color_accent_darkBlue);
-    color: var(--color_accent_darkBlue);
-    display: flex;
-    flex-direction: column;
-
-    right: 0;
-    top: 100%;
-    transform: translateY(5px);
-
-    border-radius: 10px 0 10px 10px;
-    overflow: hidden;
-    width: 30vw;
-    height: auto;
-}
-
-.filtres input[type="submit"] {
-    border-radius: 0 0 10px 10px;
-}
-
-.filtres__item {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid var(--color_background-2_white);
-    border-radius: 10px;
-    margin: 5px;
-}
-
 
 /* Настройка анимации в блоке фильтров */
 .filterBtn-enter-active,
@@ -431,25 +351,5 @@ header nav {
 
 #btn_uploadToDataBaseForTracking:hover::before {
     transform: translateY(-100%);
-}
-
-
-
-/* Настройка пунктов фильтра */
-#filter3,
-#filter4 {
-    display: grid;
-    grid-template-columns: repeat(2, 50px);
-    gap: 10px;
-}
-
-#filter5 {
-    display: flex;
-    gap: 10px;
-    justify-content: end;
-}
-
-#filter5 input[type='text'] {
-    width: 50px;
 }
 </style>

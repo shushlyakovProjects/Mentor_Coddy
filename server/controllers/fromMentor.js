@@ -8,6 +8,14 @@ const jwt = require('jsonwebtoken')
 const { SECRET_ACCESS_KEY, CRM_URL, authkey_getTeachers, authkey_getEdUnits, authkey_googleTables } = require('../config')
 const axios = require('axios')
 
+function getDateNow() {
+    const fullDate = new Date()
+    const year = fullDate.getFullYear()
+    const month = fullDate.getMonth() + 1 < 10 ? '0' + (fullDate.getMonth() + 1) : (fullDate.getMonth() + 1)
+    const day = fullDate.getDate() < 10 ? '0' + fullDate.getDate() : fullDate.getDate()
+    return `${day}-${month}-${year}`
+}
+
 // Проверка токена доступа
 router.use((request, response, next) => {
     const token = request.cookies.ACCESS_TOKEN

@@ -109,6 +109,9 @@ p {
 .small {
     font-size: var(--size_textDesktop_body-2)
 }
+.verysmall{
+    font-size: var(--size_textDesktop_body-3)
+}
 
 .error_message {
     color: rgb(244, 111, 111);
