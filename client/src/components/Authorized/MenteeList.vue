@@ -19,7 +19,8 @@
                                 title="Очистить фильтры" alt="Отмена" v-show="filterIsOpen">
                         </transition>
 
-                        <button title="Настройка фильтров" @click="filterIsOpen = !filterIsOpen">Фильтры</button>
+                        <button v-if="MENTEE_LIST.length != 0" title="Настройка фильтров"
+                            @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
                         <transition name="filterForm">
                             <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart"
@@ -27,8 +28,8 @@
                         </transition>
                     </div>
 
-                    <button @click="uploadToDataBaseForTracking()" id="btn_uploadToDataBaseForTracking"
-                        title="Отслеживать динамику с текущего момента"
+                    <button v-if="MENTEE_LIST.length != 0" @click="uploadToDataBaseForTracking()"
+                        id="btn_uploadToDataBaseForTracking" title="Отслеживать динамику с текущего момента"
                         :data-lastupdate="lastUpdate ? `Посл загр ${lastUpdate}` : `Загрузка...`">Загрузить
                         в базу</button>
 
@@ -63,10 +64,6 @@
                         </p>
                     </div>
                     <div>
-                        <p class="small"
-                            :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
-                            Дисциплин:
-                            {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
                         <p class="small" :class="getBackLight(item.InfoEdUnits.CountConstantUnits)">
                             Постоянных учеников:
                             {{ item.InfoEdUnits.CountConstantUnits }}
@@ -76,28 +73,44 @@
                         <p class="small" v-if="item.Feedback"
                             :class="getBackLight(item.Feedback.CountPaidModules != undefined ? item.Feedback.CountPaidModules : 0)">
                             Завершено модулей:
-                            {{ item.Feedback ? item.Feedback.CountPaidModules : 'Отсутсвует' }}. ≈{{
-                                item.Feedback.CountPaidModules > 0 ? item.Feedback.CountPaidModules * 6 : '' }}ч</p>
+                            {{ item.Feedback ? item.Feedback.CountPaidModules : 'Отсутсвует' }}.
+                            <span v-show="item.InfoEdUnits.CountConstantUnits != 0">≈{{ item.Feedback.CountPaidModules >
+                                0
+                                ? item.Feedback.CountPaidModules * 6 : '' }}ч</span>
+                        </p>
+                        <p class="verysmall"
+                            :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
+                            Дисциплин:
+                            {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
                     </div>
 
                     <div>
-                        <p class="small"
-                            :class="getBackLight(0, item.Feedback ? formatDate(item.Feedback.Date) : 'Отсутсвует')">
-                            ОС:
-                            {{ item.Feedback ? formatDate(item.Feedback.Date) : 'Отсутсвует' }}
-                        </p>
                         <p class="small" v-if="item.Feedback"
                             :class="getBackLight(0, item.Feedback.CountConstantUnits > 0 ? 'Ведет постоянных' : 'Ведет пробные')">
                             {{ item.Feedback.CountConstantUnits > 0 ? 'Ведет постоянных' : 'Ведет пробные' }}</p>
                         <p class="small" v-if="item.Feedback"
                             :class="getBackLight(0, item.Feedback ? item.Feedback.CheckInfo : '')">
-                            Нормативы:
                             {{ item.Feedback ? item.Feedback.CheckInfo : '' }}</p>
+                        <p class="verysmall"
+                            :class="getBackLight(0, item.Feedback ? formatDate(item.Feedback.Date) : 'Отсутсвует')">
+                            ОС:
+                            {{ item.Feedback ? formatDate(item.Feedback.Date) : 'Отсутсвует' }}
+                        </p>
                     </div>
 
-                    <div>
-                        <textarea class="comment-box" placeholder="Комментарий"
-                            :ref="'comment-box-' + item.Id"></textarea>
+                    <div class="comment-box">
+                        <textarea placeholder="Заметки"
+                            v-bind:value="item.PrevBrief != undefined ? item.PrevBrief.CommentContent : ''"
+                            :id="'CommentContent_' + item.Id"
+                            :style="item.PrevBrief != undefined ? 'background-color:' + item.PrevBrief.CommentColor : ''"
+                            spellcheck="false" @focus="commentingMentee($event, item.Id)"
+                            @focusout="uploadCommentMentee($event, item.Id)"></textarea>
+
+                        <input type="color" @focusout="uploadCommentMentee($event, item.Id)"
+                            :id="'CommentColor_' + item.Id"
+                            :value="item.PrevBrief.CommentContent ? item.PrevBrief.CommentColor : '#FFFFFF'">
+                        <!-- <p v-show="item.PrevBrief != undefined ? item.PrevBrief.CommentDate != null && item.PrevBrief.CommentContent != null : ''"
+                            class="verysmall">{{ formatDate(item.PrevBrief.CommentDate) }}</p> -->
                     </div>
 
                     <nav>
@@ -126,7 +139,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import MenteeCard from './MenteeCard.vue';
 import MenteeListFilter from '../UI/MenteeList-Filter.vue';
 import { mapGetters } from 'vuex';
@@ -140,6 +152,12 @@ export default {
             lastUpdate: '',
             backLight: false,
             filterIsOpen: false,
+
+            comment: {
+                contentForCompare: '',
+                colorForCompare: ''
+            }
+
         }
     },
     computed: { ...mapGetters(['getMenteeList', 'getFeedbackList']) },
@@ -168,12 +186,25 @@ export default {
                     this.filterIsOpen = false
                 }
             }
-
-            // console.log(e.target);
-
         })
     },
     methods: {
+        commentingMentee(event, MenteeId) {
+            const Color = document.getElementById('CommentColor_' + MenteeId).value
+            const Content = document.getElementById('CommentContent_' + MenteeId).value.trim()
+            this.comment.contentForCompare = Content
+            this.comment.colorForCompare = Color
+        },
+        uploadCommentMentee(event, MenteeId) {
+            const Color = document.getElementById('CommentColor_' + MenteeId).value
+            const Content = document.getElementById('CommentContent_' + MenteeId).value.trim()
+            console.log(Content, Color);
+
+            if (Content != this.comment.contentForCompare || (Color != this.comment.colorForCompare && Content != '')) {
+                const CommentInfo = { MenteeId, Content, Color }
+                this.$store.dispatch('uploadCommentToDataBase', CommentInfo)
+            }
+        },
         async uploadToDataBaseForTracking() {
             await this.getMenteeData()
             await this.$store.dispatch('uploadToDataBaseForTracking', this.MENTEE_LIST)
@@ -237,6 +268,7 @@ export default {
     top: 0px;
     transition-duration: 0.3s;
     margin-bottom: 20px;
+    z-index: 5;
 }
 
 .header__inScrolling {
@@ -261,7 +293,7 @@ header nav {
     border: 1px solid var(--color_accent_gray);
     padding: 5px 10px;
     display: grid;
-    grid-template-columns: 25px 100px 150px 200px 220px 1fr 100px;
+    grid-template-columns: 25px 1fr 1.3fr 2fr 1fr 3fr 120px;
     align-items: start;
     overflow-wrap: anywhere;
     gap: 10px;
@@ -272,7 +304,7 @@ header nav {
     display: flex;
     justify-content: end;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
 }
 
 .mentee__item:hover {
@@ -285,7 +317,36 @@ header nav {
 }
 
 
-.comment-box {}
+.comment-box {
+    position: relative;
+}
+
+.comment-box textarea {
+    width: 100%;
+}
+
+.comment-box input[type="color"] {
+    position: absolute;
+    padding: 0;
+    aspect-ratio: 1/1;
+    width: 30px;
+    height: 30px;
+    right: 0;
+    top: 0;
+    border: none;
+    outline: none;
+    opacity: 0.2;
+    background-color: transparent;
+}
+
+.comment-box input[type="color"]::-webkit-color-swatch {
+    border-radius: 50%;
+    border: 1px solid var(--color_accent_darkBlue);
+}
+
+.comment-box input[type="color"]:hover {
+    opacity: 0.6;
+}
 
 
 /* Фильтры, оболочка */

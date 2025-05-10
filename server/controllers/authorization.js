@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const connectionDB = require('./connectionDB')
+const connectionDB = require('../database/connectDBwithMentor')
 
-const { SECRET_ACCESS_KEY } = require('../config')
+const { SECRET_ACCESS_KEY } = process.env
 
 // Генерация токена доступа
 function generateAccessToken(UserId, Role) {

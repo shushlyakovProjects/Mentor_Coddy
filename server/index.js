@@ -1,27 +1,21 @@
 const express = require('express')
-const cookieParser = require('cookie-parser') // Пакет для парсинга cookies
+const cookieParser = require('cookie-parser')
+require('dotenv').config()
 
-// Подключение внешних модулей
+// Импорт внешних модулей
 const { registration } = require('./controllers/registration')
 const { authorization } = require('./controllers/authorization')
 const adminController = require('./controllers/fromAdmin')
 const mentorController = require('./controllers/fromMentor')
 const menteeController = require('./controllers/fromMentee')
-const connectionDB = require('./controllers/connectionDB')
 const log = require('./logs/log')
 
 const app = express()
-const PORT = 3000
-
-
-
 
 // Middlewares
 app.use(express.json()) // Для корректного чтения JSON
 app.use(cookieParser()) // Для корректного чтения Cookies
 app.use(log) // Логирование
-
-// ДОБАВИТЬ MIDDLEWARE ПРОВЕРКИ ТОКЕНА. ЕСЛИ ТОКЕНА НЕТ - РАЗЕРЕШЕНИЙ НЕТ (КРОМЕ АВТОРИЗАЦИИ)
 
 // Перенаправление на внешние контроллеры
 app.post('/registration', registration)
@@ -31,14 +25,11 @@ app.use('/from-mentor', mentorController)
 app.use('/from-mentee', menteeController)
 
 // Базоый путь, индикатор активности
-app.get('/', (request, response) => {
-    response.status(200).send('<H1>Server is running...</H1>')
-})
+app.get('/', (request, response) => { response.status(200).send(`<H1>Server is running on ${PORT}...</H1>`) })
 
 
 // app.post('/testAdmin', (request, response) => {
 //     console.log('Проверка существования пользователей');
-
 //     const SQL_QUERY = 'SELECT * FROM users'
 //     connectionDB.query(SQL_QUERY, (error, result) => {
 //         if (error) {
@@ -55,6 +46,7 @@ app.get('/', (request, response) => {
 // })
 
 
+const PORT = process.env.SERVER_PORT
 app.listen(PORT, () => {
     console.log(`Server is running on PORT: ${PORT}`);
 })

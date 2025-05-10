@@ -1,13 +1,10 @@
 const bcrypt = require('bcryptjs')
-const connectionDB = require('./connectionDB')
+const connectionDB = require('../database/connectDBwithAdmin')
 
 function registration(request, response) {
     const SQL_QUERY = 'SELECT * FROM users'
     connectionDB.query(SQL_QUERY, (error, result) => {
-        if (error) {
-            // toLog('Ошибка базы данных. Блок проверки при регистрации', "Error")
-            response.status(500).send('Ошибка базы данных')
-        }
+        if (error) { response.status(500).send('Ошибка базы данных') }
         else {
             if (result.length == 0) {
                 const { email, password, phone_number, first_name, last_name } = request.body
@@ -20,16 +17,10 @@ function registration(request, response) {
                     VALUES (NULL, '${email}', '${hashPass}', '${phone_number}', '${first_name}','${last_name}', 'admin', 'null')`
 
                 connectionDB.query(SQL_QUERY, (error, result) => {
-                    if (error) {
-                        // toLog('Ошибка базы данных. Блок регистрации', "Error")
-                        response.status(500).send('Ошибка базы данных')
-                    } else {
-                        response.status(200).send('Регистрация прошла успешно')
-                    }
+                    if (error) { response.status(500).send('Ошибка базы данных') }
+                    else { response.status(200).send('Регистрация прошла успешно') }
                 })
-            } else {
-                response.status(403).send('Доступ запрещен')
-            }
+            } else { response.status(403).send('Доступ запрещен') }
         }
     })
 }

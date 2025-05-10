@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
-const connectionDB = require('./connectionDB')
+const connectDBwithAdmin = require('../database/connectDBwithAdmin')
 
 const jwt = require('jsonwebtoken')
-const { SECRET_ACCESS_KEY } = require('../config')
+const { SECRET_ACCESS_KEY } = process.env
 
 function getDateNow() {
     const fullDate = new Date()
@@ -29,8 +29,11 @@ router.post('/downloadUsers', (request, response) => {
     const { UserId, Role } = request.dataFromChecking
     if (Role == 'admin') {
         const SQL_QUERY = `SELECT * FROM users`
-        connectionDB.query(SQL_QUERY, (error, result) => {
-            if (error) { response.status(500).send('Ошибка базы данных') }
+        connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
+            if (error) { 
+                console.log(error);
+                
+                response.status(500).send('Ошибка базы данных') }
             else { response.status(200).json(result) }
         })
     }
@@ -50,17 +53,15 @@ router.post('/addNewUser', (request, response) => {
 
         const SQL_QUERY = `INSERT INTO users (UserId, Email, Password, Phone, FirstName, LastName, Role) 
             VALUES (null, '${Email}', '${hashPass}', '${Phone}', '${FirstName}', '${LastName}', '${Role}')`
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
             if (error) {
                 if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данный Email уже занят') }
                 else { response.status(500).send('Ошибка базы данных') }
             }
-            else { response.status(200).send('Пользователь добавлен') }
+            else { response.status(201).send('Пользователь добавлен') }
         })
     }
-    else {
-        response.status(403).send('Доступ запрещен!')
-    }
+    else {response.status(403).send('Доступ запрещен!')}
 })
 
 router.post('/edit-user', (request, response) => {
@@ -79,7 +80,7 @@ router.post('/edit-user', (request, response) => {
         }
         else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}', Role='${Role}' WHERE UserId='${UserId}'` }
 
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
             if (error) {
                 if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данный Email уже занят') }
                 else { response.status(500).send('Ошибка базы данных') }
@@ -98,7 +99,7 @@ router.post('/deleteUser', (request, response) => {
     if (UserId == 1) { response.status(403).send('Доступ запрещен!') } // Запрет удаление админа №1
     if (Role == 'admin') {
         const SQL_QUERY = `DELETE FROM users WHERE UserId='${UserId}'`
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else { response.status(200).send('Пользователь удален успешно!') }
         })
@@ -124,7 +125,7 @@ router.post('/edit-admin', (request, response) => {
         else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserUserId='${UserId}'` }
 
 
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else { response.status(200).send('Данные обновлены успешно!') }
         })
