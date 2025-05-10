@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const connectionDB = require('./connectionDB')
+const connectionDB = require('../database/connectDBwithMentor')
 
 router.post('/newFeedback', async (request, response) => {
     console.log('Новая обратная связь!');
@@ -11,7 +11,7 @@ router.post('/newFeedback', async (request, response) => {
 
     connectionDB.query(SQL_QUERY, (error, result) => {
         if (error) { response.status(500).send('Ошибка базы данных. Попробуйте позже :(')}
-        else {response.status(200).send('Обратная связь отправлена. Спасибо!')}
+        else {response.status(201).send('Обратная связь получена. Спасибо!')}
     })
 })
 

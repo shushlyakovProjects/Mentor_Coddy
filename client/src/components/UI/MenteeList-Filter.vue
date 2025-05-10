@@ -1,5 +1,5 @@
 <template>
-    <form class="filtres" v-show="filterIsOpen" v-on:submit.prevent="this.$emit('filterStart', filter)">
+    <form class="filtres" v-on:submit.prevent="this.$emit('filterStart', filter)">
         <div class="filtres__item">
             <p class="small">ФИО</p>
             <input type="text" v-model="filter.fioInclude" placeholder="Содержит...">

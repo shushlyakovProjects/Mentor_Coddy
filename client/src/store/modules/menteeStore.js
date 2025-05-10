@@ -56,11 +56,26 @@ export default {
                 .then((result) => { context.commit('updateMessageSuccess', { info: result.data, isReady: true }) })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
+        async uploadCommentToDataBase(context, CommentInfo) {
+            await axios.post('/server/from-mentor/uploadCommentToDataBase', CommentInfo)
+                .then((result) => { context.commit('updateCommentLocal', CommentInfo) })
+                .catch((error) => { 
+                    console.log(error);
+                    
+                    context.commit('updateMessageError', error.response.data) })
+        },
     },
     mutations: {
         updateFeedbackList(state, newData) {
             if (state.FEEDBACK_LIST.length != newData.length) { this.commit('updateMessageSuccess', { info: 'Обратная связь получена успешно!', isReady: true }) }
             state.FEEDBACK_LIST = newData
+        },
+        updateCommentLocal(state, CommentInfo) {
+            const mentee = state.MENTEE_LIST.find((mentee) => mentee.Id == CommentInfo.MenteeId).PrevBrief
+
+            mentee.CommentDate = new Date()
+            mentee.CommentContent = CommentInfo.Content
+            mentee.CommentColor = CommentInfo.Color
         },
         updateMenteeList(state, newData) {
             if (state.MENTEE_LIST.length == 0) { state.MENTEE_LIST = newData }
@@ -138,7 +153,6 @@ export default {
 
             return filtredList
         },
-
 
         getMessages(state) { return state.messages },
         getAddedMenteeList(state) { return state.ADDED_MENTEE_LIST },

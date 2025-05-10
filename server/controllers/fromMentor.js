@@ -1,11 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
-const connectionDB = require('./connectionDB')
+const connectDBwithMentor = require('../database/connectDBwithMentor')
+const connectDBwithReader = require('../database/connectDBwithReader')
 
 
 const jwt = require('jsonwebtoken')
-const { SECRET_ACCESS_KEY, CRM_URL, authkey_getTeachers, authkey_getEdUnits, authkey_googleTables } = require('../config')
+const { SECRET_ACCESS_KEY, CRM_URL, authkey_getTeachers, authkey_getEdUnits } = process.env
 const axios = require('axios')
 
 function getDateNow() {
@@ -35,7 +36,7 @@ router.post('/deleteCheckedFeedbackFromDatabase', (request, response) => {
         console.log(checkedList);
 
         const SQL_QUERY = `DELETE FROM feedbacks WHERE FeedBackID IN (${checkedList})`
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithMentor.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else { response.status(200).send('Записи обратной связи удалены успешно!') }
         })
@@ -57,14 +58,14 @@ router.post('/uploadToDataBaseForSummary', (request, response) => {
                 VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewEdUnits}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}',
                 '${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
 
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithMentor.query(SQL_QUERY, (error, result) => {
             if (error) {
                 if (error.sqlMessage.includes('Duplicate')) { response.status(409).send('Данные сегодня уже загружались') }
                 else { response.status(500).send('Ошибка базы данных') }
             }
             else {
                 console.log('Сводка загружена успешно!');
-                response.status(200).send('Сводка загружена в базу успешно!')
+                response.status(201).send('Сводка загружена в базу успешно!')
             }
         })
 
@@ -84,7 +85,7 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
         // Определение UserId существующих преподавателей в базе
         let UserIds_EXISTING_MENTEES = []
         const GET_EXISTING_SQL_QUERY = 'SELECT * FROM mentees'
-        connectionDB.query(GET_EXISTING_SQL_QUERY, (error, result) => {
+        connectDBwithMentor.query(GET_EXISTING_SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else {
                 result.forEach(mentee => { UserIds_EXISTING_MENTEES.push(mentee.MenteeId) })
@@ -121,7 +122,7 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                         '${mentee.CountConstantUnits}', '${getDateNow()}')`
                     }
 
-                    connectionDB.query(SQL_QUERY, (error, result) => {
+                    connectDBwithMentor.query(SQL_QUERY, (error, result) => {
                         if (error) { response.status(500).send('Ошибка базы данных') }
                         else {
                             if (result.affectedRows > 0) { changedRows++; }
@@ -131,15 +132,15 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                                 if (UserIds_EXISTING_MENTEES.length) {
                                     const SQL_QUERY_FORDELETE = `DELETE FROM mentees WHERE MenteeId IN (${UserIds_EXISTING_MENTEES})`
                                     let deletedRows = 0
-                                    connectionDB.query(SQL_QUERY_FORDELETE, (error, result) => {
+                                    connectDBwithReader.query(SQL_QUERY_FORDELETE, (error, result) => {
                                         if (error) { response.status(500).send('Ошибка базы данных') }
                                         else {
                                             deletedRows = result.affectedRows
-                                            response.status(200).send(`Обновлено записей: ${changedRows} Удалено записей: ${deletedRows}`)
+                                            response.status(201).send(`Обновлено записей: ${changedRows} Удалено записей: ${deletedRows}`)
                                         }
                                     })
                                 } else {
-                                    response.status(200).send(`Обновлено записей: ${changedRows}`)
+                                    response.status(201).send(`Обновлено записей: ${changedRows}`)
                                 }
                             }
                         }
@@ -147,6 +148,47 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                 });
             }
         })
+    }
+    else {
+        response.status(403).send('Доступ запрещен!')
+    }
+})
+
+router.post('/uploadCommentToDataBase', (request, response) => {
+    console.log('Обновление комментария...');
+    const { UserId, Role } = request.dataFromChecking
+    const { MenteeId, Content, Color } = request.body
+
+    if (Role == 'admin' || Role == 'mentor') {
+
+        if (Content) {
+            const SQL_QUERY_CHECK = `SELECT * FROM comments WHERE CommentMenteeId='${MenteeId}'`
+            connectDBwithMentor.query(SQL_QUERY_CHECK, (err, result) => {
+                if (err) { response.status(500).send('Ошибка базы данных') }
+                else {
+                    let SQL_QUERY = null
+
+                    if (result.length == 0) {
+                        SQL_QUERY = `INSERT INTO comments(CommentId, CommentMenteeId, CommentDate, CommentContent, CommentColor) 
+                        VALUES(null, '${MenteeId}', '${new Date()}', '${Content}', '${Color}')`
+                    } else {
+                        SQL_QUERY = `UPDATE comments SET CommentDate='${new Date()}', CommentContent='${Content}', CommentColor='${Color}' 
+                        WHERE CommentMenteeId='${MenteeId}'`
+                    }
+                    connectDBwithMentor.query(SQL_QUERY, (err, result) => {
+                        if (err) { response.status(500).send('Ошибка базы данных') }
+                        else { response.status(201).send('Комментарий загружен успешно!') }
+                    })
+                }
+            })
+        } else {
+            SQL_QUERY = `DELETE FROM comments WHERE CommentMenteeId='${MenteeId}'`
+            connectDBwithMentor.query(SQL_QUERY, (err, result) => {
+                if (err) { response.status(500).send('Ошибка базы данных') }
+                else { response.status(200).send('Комментарий удален успешно!') }
+            })
+        }
+
     }
     else {
         response.status(403).send('Доступ запрещен!')
@@ -165,14 +207,14 @@ router.post('/downloadSummaryFromDataBase', async (request, response) => {
 
         // Получение сводки сначала за неделю
         const SQL_QUERY_WEEKLY = `SELECT * FROM summary_weekly ORDER BY SummaryId DESC LIMIT 1`
-        connectionDB.query(SQL_QUERY_WEEKLY, (err, result) => {
+        connectDBwithReader.query(SQL_QUERY_WEEKLY, (err, result) => {
             if (err) { response.status(500).send('Ошибка базы данных') }
             else {
                 ALL_SUMMARY.prev_summary_weekly = result
 
                 // Если данные за неделю успешно получены, то получение за месяц
                 const SQL_QUERY_MONTHLY = `SELECT * FROM summary_monthly ORDER BY DateOfUpdate DESC LIMIT 1`
-                connectionDB.query(SQL_QUERY_MONTHLY, (err, result) => {
+                connectDBwithReader.query(SQL_QUERY_MONTHLY, (err, result) => {
                     if (err) { response.status(500).send('Ошибка базы данных') }
                     else {
                         ALL_SUMMARY.prev_summary_monthly = result
@@ -191,7 +233,7 @@ router.post('/downloadFeedbackFromDatabase', async (request, response) => {
 
         const SQL_QUERY = `SELECT * FROM feedbacks`
 
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithReader.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else { response.status(200).json(result) }
         })
@@ -282,11 +324,14 @@ router.post('/downloadMenteeData', async (request, response) => {
                         let added_mentee = []
                         let excluded_mentee = []
 
-                        const SQL_QUERY = `SELECT * FROM mentees`
-                        connectionDB.query(SQL_QUERY, (err, result) => {
+                        const SQL_QUERY = `SELECT * FROM mentees LEFT JOIN comments ON mentees.MenteeId=comments.CommentMenteeId UNION 
+                        SELECT * FROM mentees RIGHT JOIN comments ON mentees.MenteeId=comments.CommentMenteeId;`
+                        connectDBwithReader.query(SQL_QUERY, (err, result) => {
                             if (err) { response.status(500).send('Ошибка базы данных') }
                             else {
                                 const menteeFromDataBase = result
+
+                                // console.log(menteeFromDataBase);
 
                                 // Перебор списка менти
                                 MENTEES_LIST.forEach((mentee, index) => {
@@ -300,8 +345,13 @@ router.post('/downloadMenteeData', async (request, response) => {
 
                                     // Определение новых менти
                                     mentee.PrevBrief = menteeFromDataBase.find((infoFromDB) => { return infoFromDB.MenteeId == mentee.Id })
-                                    if (mentee.PrevBrief == undefined) { added_mentee.push(mentee) }
+
+                                    
                                     if (mentee.PrevBrief != undefined) { menteeFromDataBase.splice(menteeFromDataBase.findIndex(menteeFromDB => menteeFromDB.MenteeId == mentee.Id), 1) }
+                                    if (mentee.PrevBrief == undefined) {
+                                        added_mentee.push(mentee)
+                                        mentee.PrevBrief = menteeFromDataBase.find((infoFromDB) => { return infoFromDB.CommentMenteeId == mentee.Id })
+                                    }
 
                                     // Перебор всех учебных единиц, распределение по разным менти
                                     ALL_UNITS_BY_MENTEES_LIST.forEach((unit) => {
@@ -350,7 +400,7 @@ router.post('/edit-profile', (request, response) => {
         else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserId='${UserId}'` }
 
 
-        connectionDB.query(SQL_QUERY, (error, result) => {
+        connectDBwithReader.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else { response.status(200).send('Данные обновлены успешно!') }
         })

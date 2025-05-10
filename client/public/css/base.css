@@ -128,8 +128,8 @@ p {
     width: 8px;
     background-color: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
     background-color: rgb(139, 139, 139);
     border-radius: 5px;
 }
+.comment-box ::-webkit-scrollbar{width: 0;}
