@@ -84,7 +84,7 @@ export default {
 </script>
 
 <style scoped>
-@import url(settings.css);
+@import url(@/assets/css/edits.css);
 
 .profileSettings {
     position: fixed;

@@ -133,7 +133,7 @@ export default {
 </script>
 
 <style scoped>
-@import url(settings.css);
+/* @import url(settings.css); */
 
 .menteeCard {
     position: fixed;

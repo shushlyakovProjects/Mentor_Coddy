@@ -1,0 +1,22 @@
+@media (max-width:768px) {
+    .summary_wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    header nav {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* .wrapper header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        flex-direction: column;
+        margin-bottom: 20px;
+        gap: 10px;
+    } */
+}

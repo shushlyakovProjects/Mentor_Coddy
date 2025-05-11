@@ -110,7 +110,7 @@ export default {
 </script>
 
 <style scoped>
-@import url(settings.css);
+@import url(@/assets/css/edits.css);
 
 .userSettings {
     position: fixed;

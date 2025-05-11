@@ -33,7 +33,7 @@ export default {
     data() {
         return {
             infoCurrentUser: {},
-            hiddenFields: ['user_id', 'role'],
+            hiddenFields: ['UserId', 'Role'],
             messages: {
                 error: '',
                 success: ''
@@ -67,7 +67,7 @@ export default {
         },
         downloadCurrentUser() {
             for (let key in this.getCurrentUser) {
-                if (key == 'password') {
+                if (key == 'Password') {
                     this.infoCurrentUser[key] = ''
                 }
                 else if (this.hiddenFields.indexOf(key) == -1) {
@@ -95,7 +95,7 @@ export default {
 </script>
 
 <style scoped>
-@import url(settings.css);
+@import url(@/assets/css/edits.css);
 
 .adminSettings {
     position: fixed;

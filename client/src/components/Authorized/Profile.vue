@@ -9,10 +9,10 @@
                 <nav>
                     <img class="icon" src="../../../public/img/settings.svg" alt="Настройки"
                         title="Редактировать профиль" @click="this.isOpenAdminSettings = true"
-                        v-if="getCurrentUser.role == 'admin'">
+                        v-if="getCurrentUser.Role == 'admin'">
                     <img class="icon" src="../../../public/img/settings.svg" alt="Настройки"
                         title="Редактировать профиль" @click="this.isOpenProfileSettings = true"
-                        v-if="getCurrentUser.role != 'admin'">
+                        v-if="getCurrentUser.Role != 'admin'">
                     <!-- НАСТРОЙКИ НЕ АДМИНА -->
                 </nav>
             </header>
@@ -53,50 +53,6 @@ export default {
 </script>
 
 <style scoped>
-nav {
-    display: flex;
-    align-items: center;
-}
-
-main {
-    display: grid;
-    grid-template: auto 300px / 25% 1fr;
-    grid-template-areas:
-        'header header'
-        'info1 info2'
-    ;
-    gap: 10px;
-    overflow-wrap: break-word;
-}
-
-main>* {
-    background-color: var(--color_background-3_white);
-    padding: 10px;
-    border-radius: 10px;
-}
-
-.wrapper header {
-    grid-area: header;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.info1 {
-    grid-area: info1;
-}
-
-.info1 ul {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.info1 span {
-    color: var(--color_accent_lightBlue);
-}
-
-.info2 {
-    grid-area: info2;
-}
+@import url(@/assets/css/profile.css);
+@import url(@/assets/css/media/profile_media.css);
 </style>

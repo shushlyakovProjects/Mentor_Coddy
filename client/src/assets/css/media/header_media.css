@@ -1,0 +1,36 @@
+@media (max-width: 900px) {
+    header {
+        background: var(--color_accent_darkBlue);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 5vw;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .nav-desktop {
+        display: none;
+    }
+
+    .menu-burger {
+        display: block;
+    }
+
+    .nav-mobile {
+        display: flex;
+        border-radius: 0 0 0 10px;
+    }
+
+}
+
+@media (max-width: 600px) {
+    .nav-mobile {
+        display: flex;
+        height: 50vh;
+        width: 100%;
+        z-index: 1;
+        border-radius: 0 0 10px 10px;
+    }
+}

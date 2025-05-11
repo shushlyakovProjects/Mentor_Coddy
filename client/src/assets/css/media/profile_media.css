@@ -1,0 +1,32 @@
+@media (max-width: 900px) {
+    main {
+        display: grid;
+        grid-template: auto 300px / auto 1fr;
+        grid-template-areas:
+            'header header'
+            'info1 info2'
+        ;
+        gap: 10px;
+        overflow-wrap: break-word;
+    }
+}
+
+@media (max-width: 525px) {
+    main {
+        display: grid;
+        grid-template: auto 50vh / 1fr;
+        grid-template-areas:
+            'header header'
+            'info1 info2'
+        ;
+        gap: 0;
+        row-gap: 10px;
+        overflow-wrap: break-word;
+    }
+
+    main>*:last-child {
+        background-color: var(--color_background-3_white);
+        padding: 0;
+        border-radius: 10px;
+    }
+}
