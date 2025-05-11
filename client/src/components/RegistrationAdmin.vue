@@ -78,36 +78,6 @@ export default {
 </script>
 
 <style scoped>
-h2 {
-    text-align: center;
-    color: var(--color_accent_darkBlue);
-    margin-bottom: 30px;
-}
-
-.wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.window {
-    min-width: 500px;
-    height: auto;
-    box-shadow: 0 0 3px var(--color_accent_darkBlue);
-    background-color: var(--color_background-1_white);
-    border-radius: 10px;
-    padding: 30px 60px;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-input:not([type='submit']) {
-    background-color: var(--color_background-3_white);
-}
+@import url(@/assets/css/auth&reg.css);
+@import url(@/assets/css/media/auth&reg_media.css);
 </style>

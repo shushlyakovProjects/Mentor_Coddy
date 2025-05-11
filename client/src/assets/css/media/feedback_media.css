@@ -1,0 +1,72 @@
+@media (max-width: 1200px) {
+    .feedback_row span {
+        display: inline;
+    }
+
+    .feedback_header {
+        display: none;
+    }
+
+    .feedback_row {
+        display: grid;
+        /* grid-template-columns: 20px 90px 100px 100px 100px 100px 200px repeat(5, 40px); */
+        grid-template: auto auto auto / 30px 150px 100px auto 100px 40px;
+        grid-template-areas:
+            'id fio dc cm const nav'
+            'id date nl cm moduls nav'
+            'id phone . cm trials nav'
+        ;
+        row-gap: 5px;
+        column-gap: 15px;
+        width: 100%;
+        height: auto;
+        /* max-height: 100px; */
+    }
+
+    .feedback_row p:nth-child(1) {
+        grid-area: id;
+    }
+
+    .feedback_row p:nth-child(2) {
+        grid-area: date;
+    }
+
+    .feedback_row p:nth-child(3) {
+        grid-area: fio;
+    }
+
+    .feedback_row p:nth-child(4) {
+        grid-area: phone;
+    }
+
+    .feedback_row p:nth-child(5) {
+        grid-area: dc;
+    }
+
+    .feedback_row p:nth-child(6) {
+        grid-area: nl;
+    }
+
+    .feedback_row p:nth-child(7) {
+        grid-area: cm;
+        overflow: auto;
+    }
+
+    .feedback_row p:nth-child(8){display: none;}
+    .feedback_row p:nth-child(9) {
+        grid-area: const;
+    }
+
+    .feedback_row p:nth-child(10) {
+        grid-area: moduls;
+    }
+
+    .feedback_row p:nth-child(11) {
+        grid-area: trials;
+    }
+
+    .feedback_row nav {
+        grid-area: nav;
+    }
+
+}

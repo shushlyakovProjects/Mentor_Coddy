@@ -19,6 +19,9 @@
                                 title="Очистить фильтры" alt="Отмена" v-show="filterIsOpen">
                         </transition>
 
+                        <img v-if="MENTEE_LIST.length != 0" @click="filterIsOpen = !filterIsOpen"
+                            class="icon button-mobile" src="../../../public/img/filter.svg" alt="Настройка фильтров">
+
                         <button v-if="MENTEE_LIST.length != 0" title="Настройка фильтров"
                             @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
@@ -33,7 +36,14 @@
                         :data-lastupdate="lastUpdate ? `Посл загр ${lastUpdate}` : `Загрузка...`">Загрузить
                         в базу</button>
 
-                    <button @click="getEveryTrialLesson()" title="Получить все проведенные пробные уроки за полгода"
+                    <img v-if="MENTEE_LIST.length != 0" @click="uploadToDataBaseForTracking()"
+                        class="icon button-mobile" src="../../../public/img/uploadForTracking.svg"
+                        alt="Отслеживать динамику с текущего момента">
+                    <img v-if="MENTEE_LIST.length != 0" @click="getEveryTrialLesson()" class="icon button-mobile"
+                        src="../../../public/img/getTrails180.svg"
+                        alt="Получить все проведенные пробные уроки за 180 дней">
+
+                    <button @click="getEveryTrialLesson()" title="Получить все проведенные пробные уроки за 180 дней"
                         v-if="MENTEE_LIST.length != 0">Получить ПУ за полгода</button>
 
                 </nav>
@@ -63,6 +73,7 @@
                                 item.PrevBrief ? item.PrevBrief.CountTrialLessonsForSixMonths : 0) }})
                         </p>
                     </div>
+
                     <div>
                         <p class="small" :class="getBackLight(item.InfoEdUnits.CountConstantUnits)">
                             Постоянных учеников:
@@ -109,8 +120,6 @@
                         <input type="color" @focusout="uploadCommentMentee($event, item.Id)"
                             :id="'CommentColor_' + item.Id"
                             :value="item.PrevBrief.CommentContent ? item.PrevBrief.CommentColor : '#FFFFFF'">
-                        <!-- <p v-show="item.PrevBrief != undefined ? item.PrevBrief.CommentDate != null && item.PrevBrief.CommentContent != null : ''"
-                            class="verysmall">{{ formatDate(item.PrevBrief.CommentDate) }}</p> -->
                     </div>
 
                     <nav>
@@ -182,9 +191,7 @@ export default {
         })
         document.addEventListener('click', (e) => {
             if (this.filterIsOpen) {
-                if (!e.target.closest('.filtres-wrapper')) {
-                    this.filterIsOpen = false
-                }
+                if (!e.target.closest('.filtres-wrapper')) { this.filterIsOpen = false }
             }
         })
     },
@@ -198,7 +205,6 @@ export default {
         uploadCommentMentee(event, MenteeId) {
             const Color = document.getElementById('CommentColor_' + MenteeId).value
             const Content = document.getElementById('CommentContent_' + MenteeId).value.trim()
-            console.log(Content, Color);
 
             if (Content != this.comment.contentForCompare || (Color != this.comment.colorForCompare && Content != '')) {
                 const CommentInfo = { MenteeId, Content, Color }
@@ -206,8 +212,11 @@ export default {
             }
         },
         async uploadToDataBaseForTracking() {
-            await this.getMenteeData()
-            await this.$store.dispatch('uploadToDataBaseForTracking', this.MENTEE_LIST)
+            if (confirm('Вы уверены, что хотите начать отсчёт динамики с данного момента?')) {
+                await this.getMenteeData()
+                await this.$store.dispatch('uploadToDataBaseForTracking', this.MENTEE_LIST)
+            }
+
         },
         async getEveryTrialLesson() {
             await this.$store.dispatch('downloadEveryTrialLesson', this.MENTEE_LIST)
@@ -260,157 +269,6 @@ export default {
 </script>
 
 <style scoped>
-.menteeList_header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0px;
-    transition-duration: 0.3s;
-    margin-bottom: 20px;
-    z-index: 5;
-}
-
-.header__inScrolling {
-    background-color: var(--color_background-2_white);
-    z-index: 5;
-    padding: 10px;
-}
-
-header nav {
-    display: flex;
-    gap: 10px;
-}
-
-.mentee {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.mentee__item {
-    border-radius: 10px;
-    border: 1px solid var(--color_accent_gray);
-    padding: 5px 10px;
-    display: grid;
-    grid-template-columns: 25px 1fr 1.3fr 2fr 1fr 3fr 120px;
-    align-items: start;
-    overflow-wrap: anywhere;
-    gap: 10px;
-    transition-duration: 0.3s;
-}
-
-.mentee__item nav {
-    display: flex;
-    justify-content: end;
-    align-items: center;
-    gap: 2px;
-}
-
-.mentee__item:hover {
-    background-color: var(--color_background-4_white);
-}
-
-.mentee__item:hover .hover-bold {
-    font-weight: bold;
-    cursor: pointer;
-}
-
-
-.comment-box {
-    position: relative;
-}
-
-.comment-box textarea {
-    width: 100%;
-}
-
-.comment-box input[type="color"] {
-    position: absolute;
-    padding: 0;
-    aspect-ratio: 1/1;
-    width: 30px;
-    height: 30px;
-    right: 0;
-    top: 0;
-    border: none;
-    outline: none;
-    opacity: 0.2;
-    background-color: transparent;
-}
-
-.comment-box input[type="color"]::-webkit-color-swatch {
-    border-radius: 50%;
-    border: 1px solid var(--color_accent_darkBlue);
-}
-
-.comment-box input[type="color"]:hover {
-    opacity: 0.6;
-}
-
-
-/* Фильтры, оболочка */
-.filtres-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.filtres-wrapper button {
-    z-index: 5;
-}
-
-.filtres-wrapper .likeButton {
-    margin-right: 10px;
-    padding: 3px;
-    opacity: 0.7;
-    transition-duration: 0.3s;
-}
-
-/* Настройка анимации в блоке фильтров */
-.filterBtn-enter-active,
-.filterBtn-leave-active,
-.filterForm-enter-active,
-.filterForm-leave-active {
-    transition-duration: 0.2s;
-    transition-timing-function: ease-in-out;
-}
-
-.filterBtn-enter-from,
-.filterBtn-leave-to {
-    transform: translateX(30px);
-    opacity: 0;
-}
-
-.filterForm-enter-from,
-.filterForm-leave-to {
-    transform: translateY(-20px);
-    opacity: 0;
-}
-
-
-
-/* Настройка кнопки загрузки в БД */
-#btn_uploadToDataBaseForTracking {
-    position: relative;
-}
-
-#btn_uploadToDataBaseForTracking::before {
-    content: attr(data-lastupdate);
-    position: absolute;
-    text-align: center;
-    width: 100%;
-    height: auto;
-    left: 0;
-    top: 0;
-    z-index: -1;
-    font-size: 10px;
-    transition-duration: 0.2s;
-    color: var(--color_accent_darkBlue);
-    padding-bottom: 5px;
-}
-
-#btn_uploadToDataBaseForTracking:hover::before {
-    transform: translateY(-100%);
-}
+@import url(@/assets/css/menteelist.css);
+@import url(@/assets/css/media/menteelist_media.css);
 </style>

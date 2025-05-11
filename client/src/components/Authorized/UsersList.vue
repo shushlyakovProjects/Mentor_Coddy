@@ -15,15 +15,15 @@
 
             <div class="users">
                 <div class="users__item" v-for="(item, index) in getUsersList" :key="index">
-                    <div>
+                    <div class="users__item-fio">
                         <p>{{ item.LastName }} {{ item.FirstName }}</p>
                     </div>
-                    <div>
-                        <p>Контакты: {{ item.Phone }}</p>
-                        <p>Email: {{ item.Email }}</p>
+                    <div class="users__item-contacts">
+                        <p><span>Телефон:</span> {{ item.Phone }}</p>
+                        <p><span>Email:</span> {{ item.Email }}</p>
                     </div>
-                    <div>
-                        <p>Статус: {{ item.Role }}</p>
+                    <div class="users__item-status">
+                        <p><span>Статус:</span> {{ item.Role }}</p>
                     </div>
                     <nav>
                         <img class="icon" src="../../../public/img/settings.svg" alt="Настройки"
@@ -72,31 +72,6 @@ export default {
 </script>
 
 <style scoped>
-.users {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.users__item {
-    border-radius: 10px;
-    border: 1px solid var(--color_accent_gray);
-    padding: 10px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    align-items: center;
-}
-
-.users__item nav {
-    justify-self: end;
-    gap: 5px;
-    display: flex;
-}
-
-.wrapper header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+@import url(@/assets/css/userslist.css);
+@import url(@/assets/css/media/userslist_media.css);
 </style>

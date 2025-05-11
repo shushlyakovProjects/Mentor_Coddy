@@ -76,57 +76,6 @@ export default {
 </script>
 
 <style scoped>
-/* Настройка фильтров */
-.filtres {
-    transition-property: 0.5s;
-
-    position: absolute;
-    background-color: var(--color_background-4_white);
-    box-shadow: 0 0 3px var(--color_accent_darkBlue);
-    color: var(--color_accent_darkBlue);
-    display: flex;
-    flex-direction: column;
-
-    right: 0;
-    top: 100%;
-    transform: translateY(5px);
-
-    border-radius: 10px 0 10px 10px;
-    overflow: hidden;
-    width: 30vw;
-    height: auto;
-}
-
-.filtres input[type="submit"] {
-    border-radius: 0 0 10px 10px;
-}
-
-.filtres__item {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid var(--color_background-2_white);
-    border-radius: 10px;
-    margin: 2px 5px;
-}
-
-/* Настройка пунктов фильтра */
-#filter3,
-#filter4 {
-    display: grid;
-    grid-template-columns: repeat(2, 50px);
-    gap: 10px;
-}
-
-#filter5 {
-    display: flex;
-    gap: 10px;
-    justify-content: end;
-}
-
-#filter5 input[type='text'] {
-    width: 50px;
-}
+@import url(@/assets/css/menteelistfilter.css);
+@import url(@/assets/css/media/menteelistfilter_media.css);
 </style>

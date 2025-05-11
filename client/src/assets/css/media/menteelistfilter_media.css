@@ -1,0 +1,38 @@
+@media (max-width: 1200px) {
+
+    /* Настройка фильтров */
+    .filtres {
+        right: 0;
+        top: 100%;
+        transform: translateY(5px);
+        width: 40vw;
+        height: auto;
+    }
+}
+
+@media (max-width: 900px) {
+
+    /* Настройка фильтров */
+    .filtres {
+        right: 0;
+        top: 100%;
+        transform: translateY(5px);
+        width: 50vw;
+        height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /* Настройка фильтров */
+    .filtres {
+        right: 0;
+        top: 10vh;
+        width: 100vw;
+        height: 100vh;
+        transform: translateY(0px);
+        z-index: 20;
+        height: auto;
+        position: fixed;
+    }
+}

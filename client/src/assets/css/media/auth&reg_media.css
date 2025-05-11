@@ -1,0 +1,23 @@
+@media (max-width: 550px) {
+    .window {
+        min-width: 100%;
+        padding: 13vh 5vw;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    input:not([type='submit']) {margin-bottom: 1vh;}
+    input[type='submit']{margin-top: 2vh;}
+    h2 {margin-bottom: 13vh;}
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .wrapper {
+        justify-content: center;
+        align-items: start;
+    }
+}

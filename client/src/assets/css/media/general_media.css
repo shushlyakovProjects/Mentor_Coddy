@@ -1,0 +1,25 @@
+#main-wrapper {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#router-view {
+  flex: 1 0 100%;
+}
+
+@media (max-width: 900px) {
+  main {
+    padding: 5vh 5vw;
+  }
+  .notification {
+    width: 30vw;
+  }
+}
+
+@media (max-width: 700px) {
+  .notification {
+    width: 40vw;
+  }
+}

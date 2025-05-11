@@ -179,30 +179,6 @@ export default {
 </script>
 
 <style scoped>
-.wrapper header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-header nav {
-    display: flex;
-    gap: 10px;
-}
-
-.summary_wrapper {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.summary_wrapper-item {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    border: 1px solid gray;
-    padding: 10px;
-    border-radius: 10px;
-}
+@import url(@/assets/css/menteesummary.css);
+@import url(@/assets/css/media/menteesummary_media.css);
 </style>
