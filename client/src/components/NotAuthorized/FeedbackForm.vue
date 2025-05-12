@@ -8,7 +8,7 @@
                 <p>Пройдите, пожалуйста, небольшой опрос, заполнив все поля ниже</p>
             </header>
 
-            <form v-if="!message.success" class="fields" @submit.prevent="sendFeedback()">
+            <form v-if="!message.success" class="fields" @submit.prevent="sendFeedback()" @reset="clearForm()">
                 <div class="fields__item">
                     <p class="fields__item-question">Преподаватель</p>
                     <p class="input_wrapper">
@@ -206,6 +206,19 @@ export default {
         })
     },
     methods: {
+        clearForm() {
+            this.fields = {
+                FIO: '',
+                Phone: '',
+                HasConstantUnit: '',
+                CheckInfo: '',
+                Comments: '',
+                CountTrialUnits: '',
+                CountConstantUnits: '',
+                CountPaidModules: '',
+                NewLoad: ''
+            }
+        },
         async sendFeedback() {
             let { FIO, Phone, HasConstantUnit, CheckInfo, Comments, CountTrialUnits, CountConstantUnits, CountPaidModules, NewLoad } = this.fields
             let FeedBack = {}
@@ -266,9 +279,11 @@ header {
     color: var(--color_background-2_white);
     border-radius: 10px;
 }
-header.sended_success{
+
+header.sended_success {
     text-align: center;
 }
+
 header h2 {
     margin-bottom: 6px;
 }
@@ -342,7 +357,6 @@ header h2 {
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 10px;
     padding: 10px 15px;
     cursor: pointer;
     user-select: none;
@@ -375,5 +389,22 @@ label:focus,
     position: absolute;
     left: 0;
     color: var(--color_accent_lightBlue);
+}
+
+@media (max-width: 430px) {
+    .fields__item-row label {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        padding: 5px 10px;
+        cursor: pointer;
+        user-select: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .fields__item {
+        padding: 5px 7px;
+    }
 }
 </style>

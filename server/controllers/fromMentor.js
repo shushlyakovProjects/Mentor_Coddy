@@ -33,8 +33,6 @@ router.post('/deleteCheckedFeedbackFromDatabase', (request, response) => {
     const { Role } = request.dataFromChecking
     const { checkedList } = request.body
     if (Role == 'admin' || Role == 'mentor') {
-        console.log(checkedList);
-
         const SQL_QUERY = `DELETE FROM feedbacks WHERE FeedBackID IN (${checkedList})`
         connectDBwithMentor.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
@@ -367,7 +365,7 @@ router.post('/downloadMenteeData', async (request, response) => {
 
                                     if (index == MENTEES_LIST.length - 1) {
                                         // Определение выпущенных менти 
-                                        excluded_mentee = menteeFromDataBase.filter(item => !added_mentee.includes(item))
+                                        excluded_mentee = menteeFromDataBase.filter(item => !added_mentee.includes(item) && item.MenteeId != null)
                                         console.log('Учебные единицы получены успешно');
                                         const endTime = performance.now()
                                         console.log(`Call took ${endTime - startTime} milliseconds`)

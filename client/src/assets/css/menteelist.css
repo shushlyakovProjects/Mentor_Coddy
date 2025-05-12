@@ -3,7 +3,7 @@
     justify-content: space-between;
     align-items: center;
     position: sticky;
-    top: 0px;
+    top: 57px;
     transition-duration: 0.3s;
     margin-bottom: 20px;
     z-index: 5;
@@ -12,7 +12,7 @@
 .header__inScrolling {
     background-color: var(--color_background-2_white);
     z-index: 5;
-    padding: 10px;
+    padding: 5px;
 }
 
 header nav {

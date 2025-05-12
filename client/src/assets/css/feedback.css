@@ -3,8 +3,12 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    position: sticky;
+    top: 57px;
+    z-index: 1;
+    background-color: var(--color_background-2_white);
 }
-
+.button-mobile{display: none;}
 .wrapper header nav {
     display: flex;
     gap: 10px;
@@ -142,6 +146,7 @@
     border-radius: 10px;
     margin: 5px;
 }
+.forMobile{display: none;}
 
 #filter3,
 #filter4 {

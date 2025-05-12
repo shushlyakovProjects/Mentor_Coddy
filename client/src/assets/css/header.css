@@ -7,8 +7,12 @@ header {
     margin-bottom: 30px;
 
     transform-style: preserve-3d;
-    perspective: 1000px;
+    perspective: 400px;
     perspective-origin: top;
+    z-index: 100;
+    position: sticky;
+    top: -1px;
+    height: 58px;
 }
 
 .logo,
@@ -51,6 +55,7 @@ nav {
     background: var(--color_accent_darkBlue);
     text-align: center;
     right: 0;
+    z-index: 10;
 }
 
 .menu-burger,
@@ -69,5 +74,5 @@ nav {
 .menuburget-mobile-enter-from,
 .menuburget-mobile-leave-to {
     opacity: 0;
-    transform: translateY(-40%) rotateX(80deg);
+    transform: translateY(-5%);
 }

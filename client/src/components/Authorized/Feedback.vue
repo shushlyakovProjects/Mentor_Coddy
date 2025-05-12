@@ -16,10 +16,25 @@
                                 v-show="filterIsOpen">
                         </transition>
 
+                        <img @click="filterIsOpen = !filterIsOpen" class="icon button-mobile"
+                            src="../../../public/img/filter.svg" alt="Настройка фильтров">
+
                         <button title="Настройка фильтров" @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
                         <transition name="filterForm">
                             <form class="filtres" v-show="filterIsOpen" v-on:submit.prevent="filterStart()">
+
+
+                                <div class="filtres__item forMobile">
+                                    <h2>Фильтр</h2>
+                                    <img @click="getFeedbackFromDatabase()" class="likeButton icon"
+                                        src="../../../public/img/delete.svg" title="Очистить фильтры" alt="Отмена"
+                                        v-show="filterIsOpen">
+                                </div>
+
+
+
+
                                 <div class="filtres__item">
                                     <p class="small">ФИО</p>
                                     <input type="text" v-model="filter.fioInclude" placeholder="Содержит...">
@@ -53,6 +68,13 @@
                         </transition>
 
                     </div>
+
+                    <img @click="$router.push('/mentee/feedback')" class="icon button-mobile"
+                        src="../../../public/img/feedbackForm.svg" alt="Просмотр формы сбора ОС">
+
+                    <img v-if="checkedList.length != 0" @click="deleteCheckedFeedback()" class="icon button-mobile"
+                        src="../../../public/img/delete.svg" alt="Удалить выбранные">
+
 
                     <button @click="$router.push('/mentee/feedback')" title="Просмотр формы сбора ОС">Форма</button>
                     <button @click="deleteCheckedFeedback()" title="Удалить выбранные"
@@ -97,9 +119,12 @@
                         }">{{ item.NewLoad }}</p>
                         <p class="small onHover">{{ item.Comments }}</p>
                         <p class="small">{{ item.HasConstantUnit }}</p>
-                        <p class="small"><span>Постоянных:</span>{{ item.HasConstantUnit == 'Да' ? item.CountConstantUnits : '-' }}</p>
-                        <p class="small"><span>Модулей:</span>{{ item.HasConstantUnit == 'Да' ? item.CountPaidModules : '-' }}</p>
-                        <p class="small"><span>Пробников:</span>{{ item.HasConstantUnit != 'Да' ? item.CountTrialUnits : '-' }}</p>
+                        <p class="small"><span>Постоянных:</span>{{ item.HasConstantUnit == 'Да' ?
+                            item.CountConstantUnits : '-' }}</p>
+                        <p class="small"><span>Модулей:</span>{{ item.HasConstantUnit == 'Да' ? item.CountPaidModules :
+                            '-' }}</p>
+                        <p class="small"><span>Пробников:</span>{{ item.HasConstantUnit != 'Да' ? item.CountTrialUnits :
+                            '-' }}</p>
                         <nav>
                             <label :for="item.FeedBackID" class="checkbox-btn">
                                 <input type="checkbox" :id="item.FeedBackID" :value="item.FeedBackID"
@@ -151,13 +176,16 @@ export default {
     },
     methods: {
         getFeedbackFromDatabase(force = false) {
+            this.filterIsOpen=false
             this.filter = {
                 fioInclude: '',
                 sortByDate: '',
                 filterByDate: { from: '', to: '' },
             }
             this.FEEDBACK_LIST = this.getFeedbackList
-            if (this.getFeedbackList.length == 0 || force) { this.$store.dispatch('downloadFeedbackFromDatabase') }
+            if (this.getFeedbackList.length == 0 || force) { 
+                this.$store.dispatch('downloadFeedbackFromDatabase') 
+            }
         },
         formatDate(origDate) {
             const date = new Date(origDate)
@@ -169,10 +197,12 @@ export default {
             return `${day}.${month}.${year} ${hour}:${min}`
         },
         filterStart() {
+            this.filterIsOpen=false
             this.FEEDBACK_LIST = this.$store.getters.getFeedbackListWithFiltres(this.filter)
         },
         deleteCheckedFeedback() {
             this.$store.dispatch('deleteCheckedFeedbackFromDatabase', this.checkedList)
+            this.checkedList = []
         }
     }
 }
@@ -181,4 +211,5 @@ export default {
 <style scoped>
 @import url(@/assets/css/feedback.css);
 @import url(@/assets/css/media/feedback_media.css);
+@import url(@/assets/css/media/menteelistfilter_media.css);
 </style>

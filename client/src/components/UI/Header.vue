@@ -5,7 +5,7 @@
             @click="isOpenMenuBurger = !isOpenMenuBurger">
 
         <transition name="menuburget-mobile">
-            <nav v-if="isOpenMenuBurger" class="nav-mobile">
+            <nav v-if="isOpenMenuBurger" class="nav-mobile" @click="isOpenMenuBurger=false">
                 <router-link class="link" to="/mentor/feedback">Обратная связь</router-link>
                 <router-link class="link" to="/mentor/mentee-summary">Сводка</router-link>
                 <router-link class="link" to="/mentor/mentee-list">Менти</router-link>

@@ -64,5 +64,20 @@
 }
 
 @media (max-width: 600px) {
+    .mentee__item {
+        display: grid;
+        grid-template: auto auto 100px / 25px 1fr 1fr 2fr 40px;
+        grid-template-areas:
+            'id fio fio info1 info1'
+            'id fb fb info2 info2'
+            'id cm cm cm nv'
+        ;
+        gap: 10px;
+    }
+    .mentee__item nav {
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
     
 }

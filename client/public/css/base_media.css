@@ -1,0 +1,48 @@
+@media (max-width: 600px) {
+    h1 {
+        font-size: var(--size_textMobile_header-1)
+    }
+
+    h2 {
+        font-size: var(--size_textMobile_header-2)
+    }
+
+    p {
+        font-size: var(--size_textMobile_body-1)
+    }
+
+    .small {
+        font-size: var(--size_textMobile_body-2)
+    }
+
+    .verysmall {
+        font-size: var(--size_textMobile_body-3)
+    }
+
+    a,
+    a:visited,
+    a:hover {
+        text-decoration: none;
+        font-size: var(--size_textMobile_body-2);
+        user-select: none;
+        cursor: pointer;
+    }
+
+    ::-webkit-scrollbar {
+        width: 4px;
+        background-color: transparent;
+    }
+}
+
+@media (max-width: 420px) {
+    .icon {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        transition-duration: 0.2s;
+        cursor: pointer;
+        border-radius: 50%;
+        transform: scale(1.1);
+        image-rendering: crisp-edges;
+    }
+}

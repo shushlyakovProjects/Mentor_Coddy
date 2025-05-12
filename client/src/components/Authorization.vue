@@ -12,8 +12,8 @@
                 <input type="submit" value="Авторизация">
             </form>
 
-            <p class="small errorMessage">{{ messages.error }}</p>
-            <p class="small successMessage">{{ messages.success }}</p>
+            <p class="small error_message">{{ messages.error }}</p>
+            <p class="small success_message">{{ messages.success }}</p>
 
         </div>
     </div>
