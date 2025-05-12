@@ -91,6 +91,7 @@ export default {
 
 <style scoped>
 @import url(@/assets/css/edits.css);
+@import url(@/assets/css/media/edits_media.css);
 
 .addUser {
     position: fixed;

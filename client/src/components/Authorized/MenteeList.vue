@@ -26,7 +26,7 @@
                             @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
                         <transition name="filterForm">
-                            <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart"
+                            <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart" @getFeedbackFromDatabase="getMenteeData"
                                 @backLight="(value) => { backLight = value }"></MenteeListFilter>
                         </transition>
                     </div>
@@ -111,7 +111,7 @@
 
                     <div class="comment-box">
                         <textarea placeholder="Заметки"
-                            v-bind:value="item.PrevBrief != undefined ? item.PrevBrief.CommentContent : ''"
+                            v-bind:value="item.PrevBrief != undefined ? item.PrevBrief.CommentContent != null ? item.PrevBrief.CommentContent : '' : ''"
                             :id="'CommentContent_' + item.Id"
                             :style="item.PrevBrief != undefined ? 'background-color:' + item.PrevBrief.CommentColor : ''"
                             spellcheck="false" @focus="commentingMentee($event, item.Id)"
@@ -119,7 +119,7 @@
 
                         <input type="color" @focusout="uploadCommentMentee($event, item.Id)"
                             :id="'CommentColor_' + item.Id"
-                            :value="item.PrevBrief.CommentContent ? item.PrevBrief.CommentColor : '#FFFFFF'">
+                            :value="item.PrevBrief != undefined ? item.PrevBrief.CommentColor != null ? item.PrevBrief.CommentColor : '#FFFFFF' : '#FFFFFF'">
                     </div>
 
                     <nav>
@@ -222,11 +222,13 @@ export default {
             await this.$store.dispatch('downloadEveryTrialLesson', this.MENTEE_LIST)
         },
         async getMenteeData() {
+            this.filterIsOpen = false
             this.filter = { menteesOfShushlyakov: false, disciplines: '', fioInclude: '', gender: '', sortOfEdUnits: '', sortOfWorkTime: '', workDays: { min: 0, max: 360 } }
             this.MENTEE_LIST = this.getMenteeList
             if (this.MENTEE_LIST.length == 0) { await this.$store.dispatch('downloadMenteeData') }
         },
         filterStart(filter) {
+            this.filterIsOpen = false
             this.MENTEE_LIST = this.$store.getters.getMenteeListWithFiltres(filter)
         },
         formatDate(origDate) {

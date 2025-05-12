@@ -1,0 +1,33 @@
+@media (max-width: 690px) {
+    .fields__item {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: 60vh;
+        width: 80vw;
+    }
+
+    .fields__item-left {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+
+    .fields__item-left,
+    .fields__item-right {
+        flex-grow: 1;
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .fields__item {
+        width: 100%;
+    }
+
+    .fields__item-left>div,
+    .fields__item-right>div {
+        padding: 2px;
+    }
+}

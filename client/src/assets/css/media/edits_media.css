@@ -1,0 +1,18 @@
+@media (max-width: 400px) {
+
+    .fields__item,
+    .settings__item {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(2, auto);
+        gap: 5px;
+    }
+
+    .wrapper {
+        width: 90vw;
+    }
+
+    .fields {
+        margin-top: 10px;
+    }
+}

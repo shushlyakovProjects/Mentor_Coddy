@@ -27,12 +27,13 @@
     /* Настройка фильтров */
     .filtres {
         right: 0;
-        top: 10vh;
+        top: 60px;
         width: 100vw;
         height: 100vh;
         transform: translateY(0px);
-        z-index: 20;
+        z-index: 30;
         height: auto;
         position: fixed;
     }
+    .forMobile{display: grid;}
 }

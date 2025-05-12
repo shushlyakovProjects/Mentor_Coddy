@@ -19,6 +19,7 @@
     height: auto;
 }
 
+
 .filtres input[type="submit"] {
     border-radius: 0 0 10px 10px;
 }
@@ -51,3 +52,5 @@
 #filter5 input[type='text'] {
     width: 50px;
 }
+
+.forMobile{display: none;}

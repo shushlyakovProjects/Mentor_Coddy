@@ -1,5 +1,13 @@
 <template>
     <form class="filtres" v-on:submit.prevent="this.$emit('filterStart', filter)">
+
+        <div class="filtres__item forMobile">
+            <h2>Фильтр</h2>
+            <img @click="this.$emit('getFeedbackFromDatabase')" class="likeButton icon" 
+            src="../../../public/img/delete.svg" title="Очистить фильтры" alt="Отмена">
+        </div>
+
+
         <div class="filtres__item">
             <p class="small">ФИО</p>
             <input type="text" v-model="filter.fioInclude" placeholder="Содержит...">
