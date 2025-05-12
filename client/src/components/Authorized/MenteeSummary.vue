@@ -179,6 +179,6 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/menteesummary.css);
-@import url(@/assets/css/media/menteesummary_media.css);
+@import "@/assets/css/menteesummary.css";
+@import "@/assets/css/media/menteesummary_media.css";
 </style>

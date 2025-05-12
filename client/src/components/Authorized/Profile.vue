@@ -53,6 +53,6 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/profile.css);
-@import url(@/assets/css/media/profile_media.css);
+@import "@/assets/css/profile.css";
+@import "@/assets/css/media/profile_media.css";
 </style>

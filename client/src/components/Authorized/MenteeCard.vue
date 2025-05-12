@@ -133,9 +133,9 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/menteecard.css);
-@import url(@/assets/css/edits.css);
-@import url(@/assets/css/media/edits_media.css);
-@import url(@/assets/css/media/menteecard_media.css);
+@import "@/assets/css/menteecard.css";
+@import "@/assets/css/edits.css";
+@import "@/assets/css/media/edits_media.css";
+@import "@/assets/css/media/menteecard_media.css";
 
 </style>

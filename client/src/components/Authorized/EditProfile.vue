@@ -84,8 +84,8 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/edits.css);
-@import url(@/assets/css/media/edits_media.css);
+@import "@/assets/css/edits.css";
+@import "@/assets/css/media/edits_media.css";
 
 .profileSettings {
     position: fixed;

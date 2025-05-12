@@ -58,6 +58,8 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/auth&reg.css);
-@import url(@/assets/css/media/auth&reg_media.css);
+/* @import url(@/assets/css/auth&reg.css);
+@import url(@/assets/css/media/auth&reg_media.css); */
+@import "@/assets/css/auth&reg.css";
+@import "@/assets/css/media/auth&reg_media.css";
 </style>

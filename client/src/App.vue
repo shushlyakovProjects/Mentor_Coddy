@@ -40,8 +40,7 @@ export default {
 </script>
 
 <style>
-@import url(@/assets/css/general.css);
-@import url(@/assets/css/media/general_media.css);
-
+@import "@/assets/css/general.css";
+@import "@/assets/css/media/general_media.css";
 
 </style>

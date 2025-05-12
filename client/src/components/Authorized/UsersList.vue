@@ -72,6 +72,6 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/userslist.css);
-@import url(@/assets/css/media/userslist_media.css);
+@import "@/assets/css/userslist.css";
+@import "@/assets/css/media/userslist_media.css";
 </style>

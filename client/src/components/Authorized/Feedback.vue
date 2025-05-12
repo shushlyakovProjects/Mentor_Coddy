@@ -209,7 +209,7 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/feedback.css);
-@import url(@/assets/css/media/feedback_media.css);
-@import url(@/assets/css/media/menteelistfilter_media.css);
+@import "@/assets/css/feedback.css";
+@import "@/assets/css/media/feedback_media.css";
+@import "@/assets/css/media/menteelistfilter_media.css";
 </style>

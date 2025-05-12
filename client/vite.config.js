@@ -2,9 +2,16 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+  },
+
   plugins: [
     vue(),
   ],
@@ -16,20 +23,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/server': {
+        // rewrite: (path) => path.replace(/^\/server/, ''),
         target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/server/, '')
       },
-      '/crm': {
-        target: 'https://coddy.t8s.ru/',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/crm/, '')
-      },
-      // '/socket.io':{
-      //   target: 'http://localhost:4000',
-      //   changeOrigin: true,
-      //   ws: true,
-      // }
     }
 
   }

@@ -271,6 +271,6 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/menteelist.css);
-@import url(@/assets/css/media/menteelist_media.css);
+@import "@/assets/css/menteelist.css";
+@import "@/assets/css/media/menteelist_media.css";
 </style>
