@@ -84,6 +84,6 @@ export default {
 </script>
 
 <style scoped>
-@import url(@/assets/css/menteelistfilter.css);
-@import url(@/assets/css/media/menteelistfilter_media.css);
+@import "@/assets/css/menteelistfilter.css";
+@import "@/assets/css/media/menteelistfilter_media.css";
 </style>

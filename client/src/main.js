@@ -3,7 +3,6 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import store from './store'
 
-import Main from './components/Authorized/Main.vue'
 import Authorization from './components/Authorization.vue'
 import Profile from './components/Authorized/Profile.vue'
 import UsersList from './components/Authorized/UsersList.vue'
@@ -16,7 +15,7 @@ import FeedbackForm from './components/NotAuthorized/FeedbackForm.vue'
 // import RegistrationAdmin from './components/RegistrationAdmin.vue'
 
 const routes = [
-    { path: '/', component: Main },
+    { path: '/', component: Profile },
     { path: '/auth', component: Authorization },
     { path: '/mentor/lk', component: Profile },
     { path: '/mentor/users-list', component: UsersList },
