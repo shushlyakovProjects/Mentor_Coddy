@@ -10,9 +10,19 @@
 
     .wrapper {
         width: 90vw;
+        height: auto;
+        overflow: auto;
     }
 
     .fields {
         margin-top: 10px;
+    }
+}
+
+@media (max-width: 400px) and (max-height: 470px){
+    .wrapper {
+        width: 90vw;
+        height: 90vh;
+        overflow: auto;
     }
 }

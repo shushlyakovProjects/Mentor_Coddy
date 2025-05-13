@@ -97,19 +97,4 @@ export default {
 <style scoped>
 @import "@/assets/css/edits.css";
 @import "@/assets/css/media/edits_media.css";
-
-.adminSettings {
-    position: fixed;
-    z-index: 10;
-
-    width: 100vw;
-    height: 100vh;
-    left: 0;
-    top: 0;
-    background-color: var(--color_background-5_grayTransparent);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(3px);
-}
 </style>

@@ -130,9 +130,9 @@ router.post('/edit-admin', (request, response) => {
             const salt = bcrypt.genSaltSync(5) // Генерируем соль
             const hashPass = bcrypt.hashSync(Password, salt) // Хешируем пароль
 
-            SQL_QUERY = `UPDATE users SET Email='${Email}', Password='${hashPass}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserUserId='${UserId}'`
+            SQL_QUERY = `UPDATE users SET Email='${Email}', Password='${hashPass}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserId='${UserId}'`
         }
-        else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserUserId='${UserId}'` }
+        else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserId='${UserId}'` }
 
 
         connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
