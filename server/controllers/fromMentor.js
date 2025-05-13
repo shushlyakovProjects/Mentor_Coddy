@@ -85,7 +85,7 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
         const GET_EXISTING_SQL_QUERY = 'SELECT * FROM mentees'
         connectDBwithMentor.query(GET_EXISTING_SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
-            else {
+            else {              
                 result.forEach(mentee => { UserIds_EXISTING_MENTEES.push(mentee.MenteeId) })
 
                 // Перебор, определение, кого обновить, кого добавить
@@ -130,8 +130,10 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                                 if (UserIds_EXISTING_MENTEES.length) {
                                     const SQL_QUERY_FORDELETE = `DELETE FROM mentees WHERE MenteeId IN (${UserIds_EXISTING_MENTEES})`
                                     let deletedRows = 0
-                                    connectDBwithReader.query(SQL_QUERY_FORDELETE, (error, result) => {
-                                        if (error) { response.status(500).send('Ошибка базы данных') }
+                                    connectDBwithMentor.query(SQL_QUERY_FORDELETE, (error, result) => {
+                                        if (error) { 
+                                            console.log(error);
+                                            response.status(500).send('Ошибка базы данных') }
                                         else {
                                             deletedRows = result.affectedRows
                                             response.status(201).send(`Обновлено записей: ${changedRows} Удалено записей: ${deletedRows}`)
