@@ -30,17 +30,27 @@ export default {
     }
   },
   components: { Header },
-  mounted() {
-    const url = `/${document.URL.split('/').at(-2)}/${document.URL.split('/').at(-1)}`
-    if (url != '/mentee/feedback') {this.$store.dispatch('checkAuthorization', this.$router)  }
-  },
   computed: { ...mapGetters(['getCurrentUser', 'getMessages']) },
-  watch: { getMessages: { handler() { this.messages = this.getMessages }, deep: true } }
+  watch: {
+    '$route'() {
+      const url = `/${document.URL.split('/').at(-2)}/${document.URL.split('/').at(-1)}`
+      if (url != '/mentee/feedback') {
+        if (document.cookie ? document.cookie.split(';').find(cookie => cookie.includes('ACCESS_TOKEN')).split('=')[1] : '') {
+          this.$store.dispatch('checkAuthorization', this.$router)
+        }
+        else {
+          this.$store.commit('updateCurrentUser', {})
+          this.$router.push('/auth')
+        }
+      }
+    },
+
+    getMessages: { handler() { this.messages = this.getMessages }, deep: true }
+  }
 }
 </script>
 
 <style>
 @import "@/assets/css/general.css";
 @import "@/assets/css/media/general_media.css";
-
 </style>

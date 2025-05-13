@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const connectionDB = require('../database/connectDBwithMentor')
+const connectDBwithMentor = require('../database/connectDBwithMentor')
 
 const { SECRET_ACCESS_KEY } = process.env
 
@@ -13,7 +13,7 @@ function generateAccessToken(UserId, Role) {
 }
 
 function authorization(request, response) {
-    // console.log('Авторизация...');
+    console.log('Авторизация...');
 
     if (request.cookies.ACCESS_TOKEN) {
         // Токен доступа обнаружен, значит пользователь уже проходил авторизацию
@@ -27,14 +27,14 @@ function authorization(request, response) {
                 const { UserId, Role } = decodeData
                 if (Role == 'admin') {
                     const findUserQuery = `SELECT * FROM users WHERE UserId = '${UserId}'`
-                    connectionDB.query(findUserQuery, (err, result) => {
-                        if (err) { response.status(500).send('Пользователь не найден в базе') }
+                    connectDBwithMentor.query(findUserQuery, (err, result) => {
+                        if (err) { response.status(404).send('Пользователь не найден в базе') }
                         else { response.status(200).json(result) }
                     })
                 } else {
                     const findUserQuery = `SELECT * FROM users WHERE UserId = '${UserId}'`
-                    connectionDB.query(findUserQuery, (err, result) => {
-                        if (err) { response.status(500).send('Пользователь не найден в базе') }
+                    connectDBwithMentor.query(findUserQuery, (err, result) => {
+                        if (err) { response.status(404).send('Пользователь не найден в базе') }
                         else { response.status(200).json(result) }
                     })
                 }
@@ -45,37 +45,35 @@ function authorization(request, response) {
         // Достаем данные из запроса
         const { Email, Password } = request.body
 
-        // Подготавливаем SQL-запрос на проверку существования пользователя
-        const SQL_QUERY = `SELECT * FROM users WHERE Email = '${Email}'`
+        if (Email && Password) {
+            // Подготавливаем SQL-запрос на проверку существования пользователя
+            const SQL_QUERY = `SELECT * FROM users WHERE Email = '${Email}'`
 
-        // Запускаем запрос на проверку
-        connectionDB.query(SQL_QUERY, (err, result) => {
-            // Если ошибка, то отвечаем на клиент
-            if (err) {
-                // toLog('Ошибка базы данных. Блок авторизации', 'Error')
-                // console.log('Database error! Occurred while authorization.');
-                response.status(500).send('Ошибка базы данных')
-            }
-            // Если ошибок нет, идем дальше
-            else {
-                // Проверяем result. Если логин найден, то идентификация выполнена
-                if (result.length > 0) {
-                    // Идентификация выполнена! 
-                    const candUserIdate = result[0]
-                    // Проверка пароля
-                    if (bcrypt.compareSync(Password, candUserIdate.Password)) {
-                        // Аутентификация выполнена! 
-                        const token = generateAccessToken(candUserIdate.UserId, candUserIdate.Role)
-                        response.cookie('ACCESS_TOKEN', token, { maxAge: 18000000 }).status(200).json(candUserIdate)
-                        // Авторизация выполнена! 
+            // Запускаем запрос на проверку
+            connectDBwithMentor.query(SQL_QUERY, (err, result) => {
+                // Если ошибка, то отвечаем на клиент
+                if (err) { response.status(500).send('Ошибка базы данных') }
+                // Если ошибок нет, идем дальше
+                else {
+                    // Проверяем result. Если логин найден, то идентификация выполнена
+                    if (result.length > 0) {
+                        // Идентификация выполнена! 
+                        const candUserIdate = result[0]
+                        // Проверка пароля
+                        if (bcrypt.compareSync(Password, candUserIdate.Password)) {
+                            // Аутентификация выполнена! 
+                            const token = generateAccessToken(candUserIdate.UserId, candUserIdate.Role)
+                            response.cookie('ACCESS_TOKEN', token, { maxAge: 18000000 }).status(200).json(candUserIdate)
+                            // Авторизация выполнена! 
+                        } else {
+                            response.status(403).send('Пароль неверный')
+                        }
                     } else {
-                        response.status(403).send('Пароль неверный')
+                        response.status(404).send('Пользователь с таким Email не найден')
                     }
-                } else {
-                    response.status(404).send('Пользователь с таким Email не найден')
                 }
-            }
-        })
+            })
+        } else { response.status(403).send('Пользователь не авторизован') }
     }
 }
 
