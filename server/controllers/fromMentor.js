@@ -22,7 +22,16 @@ router.use((request, response, next) => {
     const token = request.cookies.ACCESS_TOKEN
     jwt.verify(token, SECRET_ACCESS_KEY, (error, decodeData) => {
         if (error) { response.status(401).send('Токен доступа недействителен') }
-        else { request.dataFromChecking = decodeData; next() }
+        else {
+            const findUserQuery = `SELECT * FROM users WHERE UserId = '${decodeData.UserId}'`
+            connectDBwithMentor.query(findUserQuery, (err, result) => {
+                if (err) { response.status(503).send('Ошибка базы при проверки авторизации') }
+                else {
+                    if (result.length == 0) { response.cookie('ACCESS_TOKEN', '', { maxAge: -1 }).status(401).send('Пользователь не существует в базе') }
+                    else { request.dataFromChecking = decodeData; next() }
+                }
+            })
+        }
     })
 })
 
@@ -85,7 +94,7 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
         const GET_EXISTING_SQL_QUERY = 'SELECT * FROM mentees'
         connectDBwithMentor.query(GET_EXISTING_SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
-            else {              
+            else {
                 result.forEach(mentee => { UserIds_EXISTING_MENTEES.push(mentee.MenteeId) })
 
                 // Перебор, определение, кого обновить, кого добавить
@@ -131,9 +140,10 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                                     const SQL_QUERY_FORDELETE = `DELETE FROM mentees WHERE MenteeId IN (${UserIds_EXISTING_MENTEES})`
                                     let deletedRows = 0
                                     connectDBwithMentor.query(SQL_QUERY_FORDELETE, (error, result) => {
-                                        if (error) { 
+                                        if (error) {
                                             console.log(error);
-                                            response.status(500).send('Ошибка базы данных') }
+                                            response.status(500).send('Ошибка базы данных')
+                                        }
                                         else {
                                             deletedRows = result.affectedRows
                                             response.status(201).send(`Обновлено записей: ${changedRows} Удалено записей: ${deletedRows}`)
@@ -346,7 +356,7 @@ router.post('/downloadMenteeData', async (request, response) => {
                                     // Определение новых менти
                                     mentee.PrevBrief = menteeFromDataBase.find((infoFromDB) => { return infoFromDB.MenteeId == mentee.Id })
 
-                                    
+
                                     if (mentee.PrevBrief != undefined) { menteeFromDataBase.splice(menteeFromDataBase.findIndex(menteeFromDB => menteeFromDB.MenteeId == mentee.Id), 1) }
                                     if (mentee.PrevBrief == undefined) {
                                         added_mentee.push(mentee)
@@ -377,9 +387,9 @@ router.post('/downloadMenteeData', async (request, response) => {
                             }
                         })
                     })
-                    .catch((error) => { response.status(523).send('API Hollihop недоступен') })
+                    .catch((error) => { response.status(503).send('API Hollihop недоступен') })
             })
-            .catch((error) => { response.status(523).send('API Hollihop недоступен') })
+            .catch((error) => { response.status(503).send('API Hollihop недоступен') })
     } else { response.status(403).send('Доступ запрещен') }
 })
 
@@ -400,7 +410,7 @@ router.post('/edit-profile', (request, response) => {
         else { SQL_QUERY = `UPDATE users SET Email='${Email}', Phone='${Phone}', FirstName='${FirstName}', LastName='${LastName}' WHERE UserId='${UserId}'` }
 
 
-        connectDBwithReader.query(SQL_QUERY, (error, result) => {
+        connectDBwithMentor.query(SQL_QUERY, (error, result) => {
             if (error) { response.status(500).send('Ошибка базы данных') }
             else { response.status(200).send('Данные обновлены успешно!') }
         })

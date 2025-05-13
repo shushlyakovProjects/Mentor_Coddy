@@ -19,7 +19,16 @@ router.use((request, response, next) => {
     const token = request.cookies.ACCESS_TOKEN
     jwt.verify(token, SECRET_ACCESS_KEY, (error, decodeData) => {
         if (error) { response.status(401).send('Токен доступа недействителен') }
-        else { request.dataFromChecking = decodeData; next() }
+        else {
+            const findUserQuery = `SELECT * FROM users WHERE UserId = '${decodeData.UserId}'`
+            connectDBwithAdmin.query(findUserQuery, (err, result) => {
+                if (err) {response.status(503).send('Ошибка базы при проверки авторизации')}
+                else {
+                    if (result.length == 0) { response.cookie('ACCESS_TOKEN', '', { maxAge: -1 }).status(401).send('Пользователь не существует в базе') }
+                    else { request.dataFromChecking = decodeData; next() }
+                }
+            })
+        }
     })
 })
 
@@ -30,10 +39,11 @@ router.post('/downloadUsers', (request, response) => {
     if (Role == 'admin') {
         const SQL_QUERY = `SELECT * FROM users`
         connectDBwithAdmin.query(SQL_QUERY, (error, result) => {
-            if (error) { 
+            if (error) {
                 console.log(error);
-                
-                response.status(500).send('Ошибка базы данных') }
+
+                response.status(500).send('Ошибка базы данных')
+            }
             else { response.status(200).json(result) }
         })
     }
@@ -61,7 +71,7 @@ router.post('/addNewUser', (request, response) => {
             else { response.status(201).send('Пользователь добавлен') }
         })
     }
-    else {response.status(403).send('Доступ запрещен!')}
+    else { response.status(403).send('Доступ запрещен!') }
 })
 
 router.post('/edit-user', (request, response) => {
