@@ -26,8 +26,9 @@
                             @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
                         <transition name="filterForm">
-                            <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart" @getFeedbackFromDatabase="getMenteeData"
-                                @backLight="(value) => { backLight = value }"></MenteeListFilter>
+                            <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart"
+                                @getFeedbackFromDatabase="getMenteeData" @backLight="(value) => { backLight = value }">
+                            </MenteeListFilter>
                         </transition>
                     </div>
 
@@ -39,12 +40,13 @@
                     <img v-if="MENTEE_LIST.length != 0" @click="uploadToDataBaseForTracking()"
                         class="icon button-mobile" src="../../../public/img/uploadForTracking.svg"
                         alt="Отслеживать динамику с текущего момента">
-                    <img v-if="MENTEE_LIST.length != 0" @click="getEveryTrialLesson()" class="icon button-mobile"
-                        src="../../../public/img/getTrails180.svg"
-                        alt="Получить все проведенные пробные уроки за 180 дней">
 
-                    <button @click="getEveryTrialLesson()" title="Получить все проведенные пробные уроки за 180 дней"
-                        v-if="MENTEE_LIST.length != 0">Получить ПУ за полгода</button>
+                    <!-- Получение ПУ 180. Функция удалена 03.06.25 -->
+                    <!-- <img v-if="MENTEE_LIST.length != 0" @click="getEveryTrialLesson()" class="icon button-mobile"
+                        src="../../../public/img/getTrails180.svg"
+                        alt="Получить все проведенные пробные уроки за 180 дней"> -->
+                    <!-- <button @click="getEveryTrialLesson()" title="Получить все проведенные пробные уроки за 180 дней"
+                        v-if="MENTEE_LIST.length != 0">Получить ПУ за полгода</button> -->
 
                 </nav>
             </header>
@@ -212,15 +214,19 @@ export default {
             }
         },
         async uploadToDataBaseForTracking() {
-            if (confirm('Вы уверены, что хотите начать отсчёт динамики с данного момента?')) {
-                await this.getMenteeData()
-                await this.$store.dispatch('uploadToDataBaseForTracking', this.MENTEE_LIST)
+            if (this.MENTEE_LIST[0].InfoEdUnits.CountTrialLessonsForSixMonths != undefined) {
+                if (confirm('Вы уверены, что хотите начать отсчёт динамики с данного момента?')) {
+                    await this.getMenteeData()
+                    await this.$store.dispatch('uploadToDataBaseForTracking', this.MENTEE_LIST)
+                }
+            } else {
+                alert('Необходимо получить все пробные занятия преподавателей')
             }
-
         },
-        async getEveryTrialLesson() {
-            await this.$store.dispatch('downloadEveryTrialLesson', this.MENTEE_LIST)
-        },
+        // Получение ПУ 180. Функция удалена 03.06.25
+        // async getEveryTrialLesson() {
+        //     await this.$store.dispatch('downloadEveryTrialLesson', this.MENTEE_LIST)
+        // },
         async getMenteeData() {
             this.filterIsOpen = false
             this.filter = { menteesOfShushlyakov: false, disciplines: '', fioInclude: '', gender: '', sortOfEdUnits: '', sortOfWorkTime: '', workDays: { min: 0, max: 360 } }

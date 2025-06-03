@@ -1,8 +1,12 @@
+// Импорт основных библиотек
 import { createApp } from 'vue'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+
+// Импорт vuex
 import store from './store'
 
+// Импорт компонентов
 import Authorization from './components/Authorization.vue'
 import Profile from './components/Authorized/Profile.vue'
 import UsersList from './components/Authorized/UsersList.vue'
@@ -11,9 +15,7 @@ import MenteeSummary from './components/Authorized/MenteeSummary.vue'
 import Feedback from './components/Authorized/Feedback.vue'
 import FeedbackForm from './components/NotAuthorized/FeedbackForm.vue'
 
-// import EditAdmin from './components/EditAdmin.vue'
-// import RegistrationAdmin from './components/RegistrationAdmin.vue'
-
+// Подготовка маршрутов для vue-router
 const routes = [
     { path: '/', component: Profile },
     { path: '/auth', component: Authorization },
@@ -23,16 +25,16 @@ const routes = [
     { path: '/mentor/mentee-summary', component: MenteeSummary },
     { path: '/mentor/feedback', component: Feedback },
     { path: '/mentee/feedback', component: FeedbackForm },
-    // { path: '/mentor/edit-admin', component: EditAdmin },
-    // { path: '/reg-admin', component: RegistrationAdmin },
 ]
 
+// Создание маршрутизатора
 const router = createRouter({
     history: createWebHistory(),
     routes
 })
 
+// Включение приложения
 createApp(App)
-    .use(store)
-    .use(router)
-    .mount('#app')
+    .use(store) // Подключение vuex-хранилища
+    .use(router) // Подключение vue-router
+    .mount('#app') // Монтирование приложения в тег div#app

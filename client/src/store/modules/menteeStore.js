@@ -28,17 +28,18 @@ export default {
                 })
                 .catch((error) => { context.commit('updateMessageError', error.response.data) })
         },
-        async downloadEveryTrialLesson(context, MENTEE_LIST) {
-            this.commit('updateMessageSuccess', { info: 'Загрузка ПУ...', isReady: false })
-            const IDs_MENTEES_LIST = []
-            MENTEE_LIST.forEach((item) => { IDs_MENTEES_LIST.push(item.Id) })
-            await axios.post('/server/from-mentor/downloadEveryTrialLesson', { IDs_MENTEES_LIST })
-                .then((result) => {
-                    context.commit('updateMessageSuccess', 'Данные получены успешно!')
-                    context.commit('addTrialLessonsToMenteeList', result.data.TRIALS_LIST)
-                })
-                .catch((error) => { context.commit('updateMessageError', error.response.data) })
-        },
+        // Получение ПУ 180. Функция удалена 03.06.25
+        // async downloadEveryTrialLesson(context, MENTEE_LIST) {
+        //     this.commit('updateMessageSuccess', { info: 'Загрузка ПУ...', isReady: false })
+        //     const IDs_MENTEES_LIST = []
+        //     MENTEE_LIST.forEach((item) => { IDs_MENTEES_LIST.push(item.Id) })
+        //     await axios.post('/server/from-mentor/downloadEveryTrialLesson', { IDs_MENTEES_LIST })
+        //         .then((result) => {
+        //             context.commit('updateMessageSuccess', 'Данные получены успешно!')
+        //             context.commit('addTrialLessonsToMenteeList', result.data.TRIALS_LIST)
+        //         })
+        //         .catch((error) => { context.commit('updateMessageError', error.response.data) })
+        // },
         async uploadToDataBaseForTracking(context, MENTEE_LIST) {
             let DATALIST_FORTRACKING = []
             MENTEE_LIST.forEach((mentee, index) => {
@@ -59,10 +60,11 @@ export default {
         async uploadCommentToDataBase(context, CommentInfo) {
             await axios.post('/server/from-mentor/uploadCommentToDataBase', CommentInfo)
                 .then((result) => { context.commit('updateCommentLocal', CommentInfo) })
-                .catch((error) => { 
+                .catch((error) => {
                     console.log(error);
-                    
-                    context.commit('updateMessageError', error.response.data) })
+
+                    context.commit('updateMessageError', error.response.data)
+                })
         },
     },
     mutations: {
@@ -71,11 +73,13 @@ export default {
             state.FEEDBACK_LIST = newData
         },
         updateCommentLocal(state, CommentInfo) {
-            const mentee = state.MENTEE_LIST.find((mentee) => mentee.Id == CommentInfo.MenteeId).PrevBrief
+            const mentee = state.MENTEE_LIST.find((mentee) => mentee.Id == CommentInfo.MenteeId)
 
-            mentee.CommentDate = new Date()
-            mentee.CommentContent = CommentInfo.Content
-            mentee.CommentColor = CommentInfo.Color
+            mentee.PrevBrief = {
+                CommentDate: new Date(),
+                CommentContent: CommentInfo.Content,
+                CommentColor: CommentInfo.Color
+            }
         },
         updateMenteeList(state, newData) {
             if (state.MENTEE_LIST.length == 0) { state.MENTEE_LIST = newData }
@@ -84,21 +88,21 @@ export default {
             })
             this.commit('updateMessageSuccess', { info: 'Данные менти получены успешно!', isReady: true })
         },
-        addTrialLessonsToMenteeList(state, TRIALS_LIST) {
-            state.MENTEE_LIST.forEach(mentee => {
-                mentee.InfoEdUnits.CountTrialLessonsForSixMonths = 0
-                if (mentee.Id in TRIALS_LIST) {
-                    for (let key in TRIALS_LIST) {
-                        if (mentee.Id == key) {
-                            mentee.InfoEdUnits.CountTrialLessonsForSixMonths = TRIALS_LIST[key]
-                            continue
-                        }
-                    }
-                }
-            })
-            this.commit('updateMessageSuccess', 'Данные по ПУ за полгода получены!')
-            setTimeout(() => { state.messages.success = '' }, 3000)
-        },
+        // addTrialLessonsToMenteeList(state, TRIALS_LIST) {
+        //     state.MENTEE_LIST.forEach(mentee => {
+        //         mentee.InfoEdUnits.CountTrialLessonsForSixMonths = 0
+        //         if (mentee.Id in TRIALS_LIST) {
+        //             for (let key in TRIALS_LIST) {
+        //                 if (mentee.Id == key) {
+        //                     mentee.InfoEdUnits.CountTrialLessonsForSixMonths = TRIALS_LIST[key]
+        //                     continue
+        //                 }
+        //             }
+        //         }
+        //     })
+        //     this.commit('updateMessageSuccess', 'Данные по ПУ за полгода получены!')
+        //     setTimeout(() => { state.messages.success = '' }, 3000)
+        // },
         updateMessageError(state, info) {
             state.messages.error = info
             setTimeout(() => { state.messages.error = '' }, 3000)
