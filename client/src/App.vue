@@ -1,16 +1,19 @@
 <template>
   <div id="main-wrapper">
 
+    <!-- Верхняя панель приложения -->
     <Header v-if="getCurrentUser.UserId" :currentUser="getCurrentUser"></Header>
 
+    <!-- Блок уведомлений -->
     <transition name="notification">
-      <article class="notification" v-if="messages.error || messages.success">
+      <article class="notification" v-if="getMessages.error || getMessages.success">
         <p>🔔 Уведомление</p>
-        <p class="small error_message">{{ messages.error }}</p>
-        <p class="small success_message">{{ messages.success }}</p>
+        <p class="small error_message">{{ getMessages.error }}</p>
+        <p class="small success_message">{{ getMessages.success }}</p>
       </article>
     </transition>
 
+    <!-- Компонент vue-router, необходим для отображения компонентов приложения -->
     <router-view id="router-view"></router-view>
 
   </div>
@@ -21,17 +24,10 @@ import { mapGetters } from 'vuex';
 import Header from './components/UI/Header.vue';
 
 export default {
-  data() {
-    return {
-      messages: {
-        error: '',
-        success: ''
-      }
-    }
-  },
   components: { Header },
   computed: { ...mapGetters(['getCurrentUser', 'getMessages']) },
   watch: {
+    // При изменении URL-адреса выполняется проверка авторизации пользователя
     '$route'() {
       const url = `/${document.URL.split('/').at(-2)}/${document.URL.split('/').at(-1)}`
       if (url != '/mentee/feedback') {
@@ -44,13 +40,12 @@ export default {
         }
       }
     },
-
-    getMessages: { handler() { this.messages = this.getMessages }, deep: true }
   }
 }
 </script>
 
 <style>
+/* Импорт CSS стилей */
 @import "@/assets/css/general.css";
 @import "@/assets/css/media/general_media.css";
 </style>

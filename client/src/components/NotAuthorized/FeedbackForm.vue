@@ -233,7 +233,7 @@ export default {
                     if (CountTrialUnits) {
                         CountConstantUnits = 0
                         CountPaidModules = 0
-                        FeedBack = { FIO, Phone, CheckInfo, Comments, NewLoad, HasConstantUnit, CountTrialUnits }
+                        FeedBack = { FIO, Phone, CheckInfo, Comments, NewLoad, HasConstantUnit, CountConstantUnits, CountPaidModules, CountTrialUnits }
                     } else { this.message.error = 'Заполните все поля'; }
                 }
             } else { this.message.error = 'Заполните все поля'; }
