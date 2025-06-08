@@ -67,7 +67,7 @@
                         <p>Количество новичков: {{ getDifference(getPreviousSummaryWeekly.CountOfMentee, fields.countOfMentee) }}</p>
                         <p>Получено учеников: {{ getDifference(getPreviousSummaryWeekly.CountOfConstantUnits,fields.countOfConstantUnits) }}</p>
                         <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryWeekly.СountOfNewTrials}}</p>
-                        <p>Завершено модулей: {{ fields.countOfPaidModules }}</p>
+                        <!-- <p>Завершено модулей: {{ fields.countOfPaidModules - getPreviousSummaryWeekly.CountOfPaidModules }}</p> -->
                     </div>
                 </div>
 
@@ -81,7 +81,7 @@
                         <p>Количество новичков: {{ getDifference(getPreviousSummaryMonthly.CountOfMentee, fields.countOfMentee)  }}</p>
                         <p>Получено учеников: {{getDifference(getPreviousSummaryMonthly.CountOfConstantUnits, fields.countOfConstantUnits)}}</p>
                         <p>Проведено пробников: {{ fields.countOfNewTrials -getPreviousSummaryMonthly.СountOfNewTrials }}</p>
-                        <p>Завершено модулей: {{ fields.countOfPaidModules - getPreviousSummaryMonthly.CountOfPaidModules }}</p>
+                        <!-- <p>Завершено модулей: {{ fields.countOfPaidModules - getPreviousSummaryMonthly.CountOfPaidModules }}</p> -->
                     </div>
                 </div>
             </div>
@@ -108,6 +108,7 @@ export default {
                 countOfMenteeWithoutConstantUnits: 0,
 
                 countOfConstantUnits: 0,
+                // ИНФОРМАЦИЯ О ЗАВЕРШЕННЫХ МОДУЛЯХ ОТКЛЮЧЕНА 08.06. Данные определяются согласно ОС
                 countOfPaidModules: 0,
             },
         }
@@ -130,8 +131,8 @@ export default {
             this.$store.dispatch('downloadSummaryFromDataBase')
         },
         async uploadToDataBaseForSummary(period) {
-            const { countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules } = this.fields
-            const data = { period, countOfMentee, countOfNewEdUnits, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules }
+            const { countOfMentee, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules } = this.fields
+            const data = { period, countOfMentee, countOfNewTrials, countOfMenteeWithConstantUnits, countOfConstantUnits, countOfPaidModules }
             const period_RU = period == 'weekly' ? 'недели' : 'месяца'
 
             if (confirm(`Уверены, что хотите начать отсчет ${period_RU} с текущего дня?`)) {
@@ -141,11 +142,9 @@ export default {
 
         },
         updateFields() {
+            // ВРЕМЕННО. ПОЗЖЕ нужно сменить на получение ВСЕХ менти
             const LIST = this.getMenteeListOnlyShushlyakov
             this.fields.countOfMentee = LIST.length
-
-            // let LIST_PREV_SUMMARY = new Map(Object.entries(this.getPreviousSummaryWeekly))
-            // console.log(LIST_PREV_SUMMARY);
 
             this.fields.countOfConstantUnits = 0
             this.fields.countOfNewTrials = 0
@@ -153,7 +152,8 @@ export default {
             LIST.forEach(mentee => {
                 this.fields.countOfConstantUnits += mentee.InfoEdUnits.CountConstantUnits
                 this.fields.countOfNewTrials += mentee.InfoEdUnits.CountTrialUnitsForWeek
-
+                console.log(this.fields.countOfConstantUnits);
+                
                 if (mentee.InfoEdUnits.CountConstantUnits > 0) {
                     this.fields.countOfMenteeWithConstantUnits++
                 } else {
