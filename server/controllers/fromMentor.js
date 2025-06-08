@@ -172,7 +172,7 @@ router.post('/uploadCommentToDataBase', (request, response) => {
 
     if (Role == 'admin' || Role == 'mentor') {
         console.log(MenteeId, Content, Color);
-        
+
         if (Content) {
             const SQL_QUERY_CHECK = `SELECT * FROM comments WHERE CommentMenteeId='${MenteeId}'`
             connectDBwithMentor.query(SQL_QUERY_CHECK, (err, result) => {
@@ -311,7 +311,7 @@ router.post('/downloadMenteeData', async (request, response) => {
                             const MenteeId = unit.TeacherId
                             CountAllEdUnits.set(MenteeId, CountAllEdUnits.has(MenteeId) ? CountAllEdUnits.get(MenteeId) + 1 : 0)
                             if (unit.Type == 'TrialLesson') { CountTrialUnitsForWeek.set(MenteeId, CountTrialUnitsForWeek.has(MenteeId) ? CountTrialUnitsForWeek.get(MenteeId) + 1 : 0) }
-                            if (unit.Type != 'TrialLesson') { CountConstantUnits.set(MenteeId, CountConstantUnits.has(MenteeId) ? CountConstantUnits.get(MenteeId) + 1 : 0) }
+                            if (unit.Type != 'TrialLesson') { CountConstantUnits.set(MenteeId, CountConstantUnits.has(MenteeId) ? CountConstantUnits.get(MenteeId) + 1 : 1) }
                         }
 
 
@@ -326,7 +326,7 @@ router.post('/downloadMenteeData', async (request, response) => {
                             else {
                                 const menteeList_FromDataBase = result
                                 // console.log(menteeList_FromDataBase);
-                                
+
 
                                 // Перебор списка менти
                                 MENTEES_LIST.forEach((mentee, index) => {
@@ -353,7 +353,7 @@ router.post('/downloadMenteeData', async (request, response) => {
                                         // menteOne_FromDataBase = menteeList_FromDataBase.find((infoFromDB) => { return infoFromDB.CommentMenteeId == mentee.Id })
                                     }
 
-                                    
+
 
                                     if (index == MENTEES_LIST.length - 1) {
                                         // Определение выпущенных менти 
@@ -436,6 +436,23 @@ const UpdateWorkHours = CronJob.from({
                         return IDs_MENTEES_LIST.has(unit.ScheduleItems[0].TeacherId) && unit.Type == 'TrialLesson'
                     })
 
+                    const ALL_FIRST_LESSONS = []
+                    // Определение первого постоянного ученика
+                    MENTEES_LIST.forEach(mentee => {
+                        // if (mentee.DateOfFirstUnit == null) {
+                        if (true) {
+                            const FirstLesson = ALL_INDIVIDLESSON_BY_MENTEES_LIST.find(unit => {
+                                return unit.ScheduleItems[0].TeacherId == mentee.MenteeId
+                            })
+                            if (FirstLesson != undefined) {
+                                ALL_FIRST_LESSONS.push({
+                                    MenteeId: mentee.MenteeId,
+                                    DateOfFirstunitMentee: `${FirstLesson.ScheduleItems[0].BeginDate.split('-')[2]}-${FirstLesson.ScheduleItems[0].BeginDate.split('-')[1]}-${FirstLesson.ScheduleItems[0].BeginDate.split('-')[0]}`
+                                })
+                            }
+                        }
+                    })
+
                     // Расчет отработанных часов
                     const MenteeWorkHours = new Map()
                     ALL_INDIVIDLESSON_BY_MENTEES_LIST.forEach(unit => {
@@ -465,16 +482,27 @@ const UpdateWorkHours = CronJob.from({
                     SQL_QUERY += ' END,'
                     SQL_QUERY += `CountTrialLessonsForSixMonths = CASE`
                     for (let id of MenteeTrials.keys()) {
-                        if (id == 67934) {
-                            console.log(MenteeTrials.get(id));
-
-                        }
                         SQL_QUERY += ` WHEN MenteeId = ${id} THEN ${MenteeTrials.get(id)}`
                     }
-                    SQL_QUERY += ' END;'
+                    if (ALL_FIRST_LESSONS.length) {
+                        SQL_QUERY += ' END,'
+                        SQL_QUERY += `DateOfFirstUnit = CASE`
+                        for (let lesson of ALL_FIRST_LESSONS) {
+                            SQL_QUERY += ` WHEN MenteeId = ${lesson.MenteeId} THEN '${lesson.DateOfFirstunitMentee}'`
+                        }
+                        SQL_QUERY += ' END;'
+                    } else {
+                        SQL_QUERY += ' END;'
+                    }
+
+                    // console.log(SQL_QUERY);
+
 
                     connectDBwithMentor.query(SQL_QUERY, (error, result) => {
-                        if (error) { console.log('Ошибка при плановом обновлении отработанных часов и пробных уроков менти!') }
+                        if (error) {
+                            // console.log(error);
+                            console.log('Ошибка при плановом обновлении!')
+                        }
                         else {
                             console.log('Часы обновлены');
                             const endTime = performance.now()

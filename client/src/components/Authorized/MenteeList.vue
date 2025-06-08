@@ -12,34 +12,32 @@
                 </div>
 
                 <!-- Фильтры -->
-                <nav>
+                <nav v-show="getMenteeList.length">
                     <div class="filtres-wrapper">
                         <transition name="filterBtn">
                             <img @click="getMenteeData()" class="likeButton icon" src="../../../public/img/delete.svg"
                                 title="Очистить фильтры" alt="Отмена" v-show="filterIsOpen">
                         </transition>
 
-                        <img v-if="MENTEE_LIST.length != 0" @click="filterIsOpen = !filterIsOpen"
-                            class="icon button-mobile" src="../../../public/img/filter.svg" alt="Настройка фильтров">
+                        <img @click="filterIsOpen = !filterIsOpen" class="icon button-mobile"
+                            src="../../../public/img/filter.svg" alt="Настройка фильтров">
 
-                        <button v-if="MENTEE_LIST.length != 0" title="Настройка фильтров"
-                            @click="filterIsOpen = !filterIsOpen">Фильтры</button>
+                        <button title="Настройка фильтров" @click="filterIsOpen = !filterIsOpen">Фильтры</button>
 
                         <transition name="filterForm">
-                            <MenteeListFilter v-show="filterIsOpen" @filterStart="filterStart"
+                            <MenteeListFilter ref="MenteeListFilter" v-show="filterIsOpen" @filterStart="filterStart"
                                 @getFeedbackFromDatabase="getMenteeData" @backLight="(value) => { backLight = value }">
                             </MenteeListFilter>
                         </transition>
                     </div>
 
-                    <button v-if="MENTEE_LIST.length != 0" @click="uploadToDataBaseForTracking()"
-                        id="btn_uploadToDataBaseForTracking" title="Отслеживать динамику с текущего момента"
+                    <button @click="uploadToDataBaseForTracking()" id="btn_uploadToDataBaseForTracking"
+                        title="Отслеживать динамику с текущего момента"
                         :data-lastupdate="lastUpdate ? `Посл загр ${lastUpdate}` : `Загрузка...`">Загрузить
                         в базу</button>
 
-                    <img v-if="MENTEE_LIST.length != 0" @click="uploadToDataBaseForTracking()"
-                        class="icon button-mobile" src="../../../public/img/uploadForTracking.svg"
-                        alt="Отслеживать динамику с текущего момента">
+                    <img @click="uploadToDataBaseForTracking()" class="icon button-mobile"
+                        src="../../../public/img/uploadForTracking.svg" alt="Отслеживать динамику с текущего момента">
 
                     <!-- Получение ПУ 180. Функция удалена 03.06.25 -->
                     <!-- <img v-if="MENTEE_LIST.length != 0" @click="getEveryTrialLesson()" class="icon button-mobile"
@@ -61,16 +59,18 @@
                     </div>
 
                     <div>
-                        <p class="small" :class="getBackLight(item.InfoEdUnits.CountTrialUnitsForWeek)">
+                        <p class="small" :class="getBackLight(item.InfoEdUnits.CountTrialUnitsForWeek)"
+                            title="За последнюю неделю">
                             ПУ за неделю:
                             {{ item.InfoEdUnits.CountTrialUnitsForWeek }}
                             ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountTrialUnitsForWeek : 0,
                                 item.PrevBrief ? item.PrevBrief.CountTrialUnitsForWeek : 0) }})
                         </p>
-                        <p class="small" v-if="item.InfoEdUnits.CountTrialLessonsForSixMonths != undefined"
-                            :class="getBackLight(item.InfoEdUnits.CountTrialLessonsForSixMonths)" title="За 180 дней">
+                        <p class="small" :class="getBackLight(item.InfoEdUnits.CountTrialLessonsForSixMonths)"
+                            title="За 180 дней">
                             ПУ всего:
-                            {{ item.InfoEdUnits.CountTrialLessonsForSixMonths }}
+                            {{ item.InfoEdUnits.CountTrialLessonsForSixMonths == null ? 0 :
+                                item.InfoEdUnits.CountTrialLessonsForSixMonths}}
                             ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountTrialLessonsForSixMonths : 0,
                                 item.PrevBrief ? item.PrevBrief.CountTrialLessonsForSixMonths : 0) }})
                         </p>
@@ -83,18 +83,15 @@
                             ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountConstantUnits : 0,
                                 item.PrevBrief ? item.PrevBrief.CountConstantUnits : 0) }})
                         </p>
-                        <p class="small" v-if="item.Feedback"
-                            :class="getBackLight(item.Feedback.CountPaidModules != undefined ? item.Feedback.CountPaidModules : 0)">
-                            Завершено модулей:
-                            {{ item.Feedback ? item.Feedback.CountPaidModules : 'Отсутсвует' }}.
-                            <span v-show="item.InfoEdUnits.CountConstantUnits != 0">≈{{ item.Feedback.CountPaidModules >
-                                0
-                                ? item.Feedback.CountPaidModules * 6 : '' }}ч</span>
-                        </p>
+                        <p class="small"
+                            :class="getBackLight(item.PrevBrief.WorkHours != null ? item.PrevBrief.WorkHours / 8 : 0)">
+                            Отработано часов:
+                            {{ item.PrevBrief.WorkHours != null ? item.PrevBrief.WorkHours : 0 }}</p>
                         <p class="verysmall"
                             :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
                             Дисциплин:
                             {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
+
                     </div>
 
                     <div>
@@ -142,7 +139,8 @@
                     </nav>
                 </div>
 
-                <div class="loading" v-if="!MENTEE_LIST.length"></div>
+                <div class="loading" v-if="!getMenteeList.length"></div>
+                <div v-if="getMenteeList.length && MENTEE_LIST.length == 0">Записей по фильтрам не найдено :(</div>
             </div>
 
         </main>
@@ -214,14 +212,15 @@ export default {
             }
         },
         async uploadToDataBaseForTracking() {
-            if (this.MENTEE_LIST[0].InfoEdUnits.CountTrialLessonsForSixMonths != undefined) {
+            if (this.MENTEE_LIST.length) {
                 if (confirm('Вы уверены, что хотите начать отсчёт динамики с данного момента?')) {
                     await this.getMenteeData()
                     await this.$store.dispatch('uploadToDataBaseForTracking', this.MENTEE_LIST)
                 }
             } else {
-                alert('Необходимо получить все пробные занятия преподавателей')
+                alert('Получение менти...')
             }
+
         },
         // Получение ПУ 180. Функция удалена 03.06.25
         // async getEveryTrialLesson() {
@@ -229,7 +228,7 @@ export default {
         // },
         async getMenteeData() {
             this.filterIsOpen = false
-            this.filter = { menteesOfShushlyakov: false, disciplines: '', fioInclude: '', gender: '', sortOfEdUnits: '', sortOfWorkTime: '', workDays: { min: 0, max: 360 } }
+            this.$refs.MenteeListFilter.clearFiltres();
             this.MENTEE_LIST = this.getMenteeList
             if (this.MENTEE_LIST.length == 0) { await this.$store.dispatch('downloadMenteeData') }
         },
