@@ -61,9 +61,9 @@ router.post('/uploadToDataBaseForSummary', (request, response) => {
 
     if (Role == 'admin' || Role == 'mentor') {
         const table = data.period == 'weekly' ? 'summary_weekly' : 'summary_monthly'
-        const SQL_QUERY = `INSERT INTO ${table} (DateOfUpdate, CountOfMentee, СountOfNewEdUnits, СountOfNewTrials, 
+        const SQL_QUERY = `INSERT INTO ${table} (DateOfUpdate, CountOfMentee, СountOfNewTrials, 
                 CountOfMenteeWithConstantUnits, CountOfConstantUnits, CountOfPaidModules) 
-                VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewEdUnits}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}',
+                VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}',
                 '${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
 
         connectDBwithMentor.query(SQL_QUERY, (error, result) => {
