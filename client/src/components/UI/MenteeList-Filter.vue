@@ -3,8 +3,8 @@
 
         <div class="filtres__item forMobile">
             <h2>Фильтр</h2>
-            <img @click="this.$emit('getFeedbackFromDatabase')" class="likeButton icon" 
-            src="../../../public/img/delete.svg" title="Очистить фильтры" alt="Отмена">
+            <img @click="this.$emit('getFeedbackFromDatabase')" class="likeButton icon"
+                src="../../../public/img/delete.svg" title="Очистить фильтры" alt="Отмена">
         </div>
 
 
@@ -26,12 +26,12 @@
             </div>
         </div>
         <div class="filtres__item">
-            <p class="small">Длительность работы </p>
+            <p class="small">Отработано часов</p>
             <div id="filter4">
-                <label for="filter4_asc">↗️<input id="filter4_asc" type="radio" value="asc" name="sortOfWorkTime"
-                        v-model="filter.sortOfWorkTime"></label>
-                <label for="filter4_desc">↘️<input id="filter4_desc" type="radio" value="desc" name="sortOfWorkTime"
-                        v-model="filter.sortOfWorkTime"></label>
+                <label for="filter4_asc">↗️<input id="filter4_asc" type="radio" value="asc" name="sortOfWorkHours"
+                        v-model="filter.sortOfWorkHours"></label>
+                <label for="filter4_desc">↘️<input id="filter4_desc" type="radio" value="desc" name="sortOfWorkHours"
+                        v-model="filter.sortOfWorkHours"></label>
             </div>
         </div>
         <div class="filtres__item">
@@ -65,12 +65,11 @@ export default {
     data() {
         return {
             filter: {
-                menteesOfShushlyakov: false, // Временный фильтр
+                menteesOfShushlyakov: true, // Временный фильтр
                 disciplines: '',
                 fioInclude: '',
-                gender: '',
                 sortOfEdUnits: '', // asc - desc
-                sortOfWorkTime: '', // asc - desc
+                sortOfWorkHours: '', // asc - desc
                 workDays: { min: 0, max: 360 },
                 backLight: false,
                 feedbackDate: ''
@@ -78,8 +77,26 @@ export default {
         }
     },
     watch: {
+        'filter.fioInclude'(newValue, oldValue) {
+            const regex = /^[А-Яа-яЁё\s]*$/
+            if (!regex.test(newValue)) { this.filter.fioInclude = oldValue }
+        },
         'filter.backLight'() { this.$emit('backLight', this.filter.backLight) }
-    }
+    },
+    methods: {
+        clearFiltres() {
+            this.filter = {
+                menteesOfShushlyakov: true, // Временный фильтр
+                disciplines: '',
+                fioInclude: '',
+                sortOfEdUnits: '', // asc - desc
+                sortOfWorkHours: '', // asc - desc
+                workDays: { min: 0, max: 360 },
+                backLight: false,
+                feedbackDate: ''
+            }
+        }
+    },
 }
 </script>
 

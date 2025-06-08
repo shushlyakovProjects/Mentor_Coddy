@@ -24,7 +24,7 @@ nav {
 
 .fields__item {
     display: flex;
-    gap: 10px;
+    gap: 5px;
     height: 60vh;
     width: 60vw;
 }
@@ -57,7 +57,7 @@ nav {
 
 .avatar img {
     border-radius: 10px;
-    width: 15vw;
+    width: 20vw;
     aspect-ratio: 1/1;
     object-fit: contain;
 }

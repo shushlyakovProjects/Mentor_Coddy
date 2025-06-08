@@ -163,7 +163,7 @@ export default {
         getExcludedMenteeList(state) { return state.EXCLUDED_MENTEE_LIST },
         getMenteeList(state) { return state.MENTEE_LIST },
         getMenteeListWithFiltres: (state) => (filtres) => {
-            const { feedbackDate, menteesOfShushlyakov, disciplines, fioInclude, workDays, sortOfEdUnits, sortOfWorkTime } = filtres
+            const { feedbackDate, menteesOfShushlyakov, disciplines, fioInclude, workDays, sortOfEdUnits, sortOfWorkHours } = filtres
             let filtredList = []
 
             filtredList = state.MENTEE_LIST.filter((elem) => {
@@ -181,32 +181,13 @@ export default {
                 return check1 && check2 && check3 && check4 && check5
             })
 
-            if (sortOfEdUnits == 'asc') { filtredList.sort((a, b) => a.InfoEdUnits.CountAllEdUnits - b.InfoEdUnits.CountAllEdUnits) }
-            if (sortOfEdUnits == 'desc') { filtredList.sort((a, b) => b.InfoEdUnits.CountAllEdUnits - a.InfoEdUnits.CountAllEdUnits) }
+            // Сортировка по постоянным ученикам
+            if (sortOfEdUnits == 'asc') { filtredList.sort((a, b) => a.InfoEdUnits.CountConstantUnits - b.InfoEdUnits.CountConstantUnits) }
+            if (sortOfEdUnits == 'desc') { filtredList.sort((a, b) => b.InfoEdUnits.CountConstantUnits - a.InfoEdUnits.CountConstantUnits) }
 
-
-            if (sortOfWorkTime == 'asc') {
-                filtredList.sort((a, b) => {
-                    const date_a = new Date(a.Created)
-                    const date_b = new Date(b.Created)
-                    const now = new Date()
-                    const numberWorkDays_a = Math.round((now - date_a) / 1000 / 60 / 60 / 24)
-                    const numberWorkDays_b = Math.round((now - date_b) / 1000 / 60 / 60 / 24)
-
-                    return numberWorkDays_a - numberWorkDays_b
-                })
-            }
-            if (sortOfWorkTime == 'desc') {
-                filtredList.sort((a, b) => {
-                    const date_a = new Date(a.Created)
-                    const date_b = new Date(b.Created)
-                    const now = new Date()
-                    const numberWorkDays_a = Math.round((now - date_a) / 1000 / 60 / 60 / 24)
-                    const numberWorkDays_b = Math.round((now - date_b) / 1000 / 60 / 60 / 24)
-
-                    return numberWorkDays_b - numberWorkDays_a
-                })
-            }
+            // Сортировка по отработанным часам
+            if (sortOfWorkHours == 'asc') { filtredList.sort((a, b) => { return a.PrevBrief.WorkHours - b.PrevBrief.WorkHours }) }
+            if (sortOfWorkHours == 'desc') { filtredList.sort((a, b) => { return b.PrevBrief.WorkHours - a.PrevBrief.WorkHours }) }
 
             // console.log(filtredList);
 

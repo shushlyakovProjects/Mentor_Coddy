@@ -29,10 +29,14 @@
                         <div class="status">
                             <p class="small"><b>ID:</b> {{ selectedMentee.Id }}</p>
                             <p class="small"><b>Статус:</b> {{ selectedMentee.Status }}</p>
+                            <p class="small"><b>Всего:</b> {{ numberWorkDays(selectedMentee.Created) }} дн.</p>
                             <p class="small"><b>Работает с:</b> {{ formatDate(selectedMentee.Created) }}</p>
-                            <p class="small"><b>Всего дней:</b> {{ numberWorkDays(selectedMentee.Created) }}</p>
-                            <p class="small" v-if="currentFeedback != undefined">
-                                <b>Часов отработано:</b> {{ currentFeedback.CountPaidModules * 6 }}+
+                            <p class="small" v-if="selectedMentee.PrevBrief != undefined">
+                                <b>Первый постоянный:</b><br>
+                                {{ selectedMentee.PrevBrief.DateOfFirstUnit}}
+                            </p>
+                            <p class="small" v-if="selectedMentee.PrevBrief != undefined">
+                                <b>Отработано:</b> {{ selectedMentee.PrevBrief.WorkHours != null ? selectedMentee.PrevBrief.WorkHours : 0 }} ч.
                             </p>
                         </div>
                     </div>
@@ -108,6 +112,12 @@ export default {
         this.currentFeedback = this.getFeedbackList ? this.getFeedbackList.findLast((feedback) => feedback.FIO.includes(this.selectedMentee.LastName)) : undefined
     },
     methods: {
+        // Изменение даты первого урока с постоянным. Пока не было использовано
+        // uploadFirstunitMentee(event, MenteeId){
+        //     const DateOfFirstunitMentee = `${event.target.value.split('-')[2]}-${event.target.value.split('-')[1]}-${event.target.value.split('-')[0]}`
+        //     const info = {MenteeId, DateOfFirstunitMentee}
+        //     this.$store.dispatch('uploadCommentMentee', info)
+        // },
         closeMenteeCard(event) {
             if (event.key == 'Escape' || event.target.classList[0] == 'menteeCard' || event.target.alt == 'Закрыть') {
                 this.$emit("closeMenteeCard");

@@ -38,8 +38,8 @@
 
 .fields__item {
     display: grid;
-    grid-template-columns: 150px 1fr;
-    gap: 20px;
+    grid-template-columns: 200px 1fr;
+    gap: 10px;
 }
 
 .settings {
