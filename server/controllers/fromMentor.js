@@ -61,10 +61,11 @@ router.post('/uploadToDataBaseForSummary', (request, response) => {
 
     if (Role == 'admin' || Role == 'mentor') {
         const table = data.period == 'weekly' ? 'summary_weekly' : 'summary_monthly'
+        // !!! CountOfPaidModules = 0. Параметр не заполняется, т.к. обратной связи нет.
         const SQL_QUERY = `INSERT INTO ${table} (DateOfUpdate, CountOfMentee, СountOfNewTrials, 
                 CountOfMenteeWithConstantUnits, CountOfConstantUnits, CountOfPaidModules) 
                 VALUES ('${getDateNow()}', '${data.countOfMentee}','${data.countOfNewTrials}','${data.countOfMenteeWithConstantUnits}',
-                '${data.countOfConstantUnits}','${data.countOfPaUserIdModules}')`
+                '${data.countOfConstantUnits}','0')`
 
         connectDBwithMentor.query(SQL_QUERY, (error, result) => {
             if (error) {
@@ -112,21 +113,19 @@ router.post('/uploadToDataBaseForTracking', (request, response) => {
                         Disciplines='${mentee.Disciplines}', 
                         CountAllEdUnits='${mentee.CountAllEdUnits}', 
                         CountTrialUnitsForWeek='${mentee.CountTrialUnitsForWeek}', 
-                        CountTrialLessonsForSixMonths='${mentee.CountTrialLessonsForSixMonths}', 
                         CountConstantUnits='${mentee.CountConstantUnits}',
                         LastUpdate='${getDateNow()}'
                         WHERE MenteeId='${mentee.Id}' AND 
                         (LastName<>'${mentee.LastName}' OR FirstName<>'${mentee.FirstName}' 
                         OR Disciplines<>'${mentee.Disciplines}' OR CountAllEdUnits<>'${mentee.CountAllEdUnits}' 
-                        OR CountTrialUnitsForWeek<>'${mentee.CountTrialUnitsForWeek}' OR CountConstantUnits<>'${mentee.CountConstantUnits}'
-                        OR CountTrialLessonsForSixMonths<>'${mentee.CountTrialLessonsForSixMonths}')`
+                        OR CountTrialUnitsForWeek<>'${mentee.CountTrialUnitsForWeek}' OR CountConstantUnits<>'${mentee.CountConstantUnits}')`
                     } else {
                         // Удаление ID из списка. Нужно для определения ID тех, кто вышел из-под менторства (они останутся нетронутыми)
                         UserIds_EXISTING_MENTEES = UserIds_EXISTING_MENTEES.filter(id => id != mentee.Id)
                         SQL_QUERY = `INSERT INTO mentees (MenteeId, LastName, FirstName, Disciplines, CountAllEdUnits, 
-                        CountTrialUnitsForWeek, CountTrialLessonsForSixMonths, CountConstantUnits, LastUpdate) 
+                        CountTrialUnitsForWeek, CountConstantUnits, LastUpdate) 
                         VALUES ('${mentee.Id}', '${mentee.LastName}', '${mentee.FirstName}', '${mentee.Disciplines}', 
-                        '${mentee.CountAllEdUnits}', '${mentee.CountTrialUnitsForWeek}', '${mentee.CountTrialLessonsForSixMonths}', 
+                        '${mentee.CountAllEdUnits}', '${mentee.CountTrialUnitsForWeek}', 
                         '${mentee.CountConstantUnits}', '${getDateNow()}')`
                     }
 
@@ -270,8 +269,18 @@ router.post('/downloadMenteeData', async (request, response) => {
                 // Очистка массива со всеми преподавателями, получение ТОЛЬКО МЕНТИ
                 MENTEES_LIST = TEACHERS_LIST.filter((elem) => elem.Status == 'Под менторством')
 
+                // Maps для оптимального хранения показателей по ID преподавателей
+                const CountAllEdUnits = new Map()
+                const CountTrialUnitsForWeek = new Map()
+                const CountConstantUnits = new Map()
+                        
                 // Получение массива идентификаторов менти
-                MENTEES_LIST.forEach(element => { UserIds_MENTEES_LIST.push(element.Id) });
+                MENTEES_LIST.forEach(element => { 
+                    UserIds_MENTEES_LIST.push(element.Id) 
+                    CountAllEdUnits.set(element.Id, 0)
+                    CountTrialUnitsForWeek.set(element.Id, 0)
+                    CountConstantUnits.set(element.Id, 0)
+                });
 
                 console.log(`Получено ${TEACHERS_LIST.length} преподавателей`);
                 console.log(`Из них ${MENTEES_LIST.length} находятся под менторством`);
@@ -282,37 +291,47 @@ router.post('/downloadMenteeData', async (request, response) => {
                 let dateTo = new Date()
 
                 // ЗАГРУЗКА УЧЕБНЫХ ЕДИНИЦ ЗА НЕДЕЛЮ
-                await axios.post(CRM_URL + `/GetEdUnits`, null, { params: { authkey: authkey_getEdUnits, dateFrom, dateTo } })
+                await axios.post(CRM_URL + `/GetEdUnits`, null, { params: { authkey: authkey_getEdUnits, dateFrom, dateTo, queryFiscalInfo:true } })
                     .then((result) => {
                         const ALL_UNITS = result.data.EdUnits
 
+                        // Class для переназначения логики метода add у Set. Добавлена проверка на уникальность по Name ученика
+                        class UniqueSetByName extends Set {
+                            add(value) {
+                                const existingItem = Array.from(this).find((item) => value.Name === item.Name); // проверка по полю id
+                                if (!existingItem) return super.add(value);
+                                else return false;
+                            }
+                        }
+
                         // Фильтрация. Необходимы только те учебные единицы, которые принадлежат менти
-                        const ALL_UNITS_BY_MENTEES_LIST = new Set()
+                        const ALL_UNITS_BY_MENTEES_LIST = new UniqueSetByName()
                         ALL_UNITS.forEach(unit => {
                             if (UserIds_MENTEES_LIST.includes(unit.ScheduleItems[0].TeacherId)) {
+                                // console.log(unit);
+                                
                                 ALL_UNITS_BY_MENTEES_LIST.add({
                                     UnitId: unit.Id,
                                     Name: unit.Name,
                                     Type: unit.Type,
                                     Discipline: unit.Discipline,
                                     TeacherId: unit.ScheduleItems[0].TeacherId,
-                                    TeacherName: unit.ScheduleItems[0].Teachers
+                                    TeacherName: unit.ScheduleItems[0].Teacher,
+                                    FiscalInfoPaidHours: unit.FiscalInfo.Units
                                 })
                             }
                         })
 
-                        // Maps для оптимального хранения показателей по ID преподавателей
-                        const CountAllEdUnits = new Map()
-                        const CountTrialUnitsForWeek = new Map()
-                        const CountConstantUnits = new Map()
-
                         // Наполнение Maps
                         for (let unit of ALL_UNITS_BY_MENTEES_LIST) {
                             const MenteeId = unit.TeacherId
+                            // console.log(unit);
+                            
                             CountAllEdUnits.set(MenteeId, CountAllEdUnits.has(MenteeId) ? CountAllEdUnits.get(MenteeId) + 1 : 0)
-                            if (unit.Type == 'TrialLesson') { CountTrialUnitsForWeek.set(MenteeId, CountTrialUnitsForWeek.has(MenteeId) ? CountTrialUnitsForWeek.get(MenteeId) + 1 : 0) }
-                            if (unit.Type != 'TrialLesson') { CountConstantUnits.set(MenteeId, CountConstantUnits.has(MenteeId) ? CountConstantUnits.get(MenteeId) + 1 : 1) }
+                            if (unit.Type == 'TrialLesson' || unit.FiscalInfoPaidHours == '0 астр.ч.') { CountTrialUnitsForWeek.set(MenteeId, CountTrialUnitsForWeek.get(MenteeId) + 1) }
+                            if (unit.Type != 'TrialLesson' && unit.FiscalInfoPaidHours != '0 астр.ч.') { CountConstantUnits.set(MenteeId, CountConstantUnits.get(MenteeId) + 1) }
                         }
+
 
 
                         let added_mentee = []
@@ -422,18 +441,18 @@ const UpdateWorkHours = CronJob.from({
 
                 // Получение всех учебных единиц
                 await axios.post(CRM_URL + `/GetEdUnits`, null, {
-                    params: { authkey: authkey_getEdUnits, dateFrom, dateTo, queryDays: true }
+                    params: { authkey: authkey_getEdUnits, dateFrom, dateTo, queryDays: true, queryFiscalInfo:true }
                 }).then((result) => {
                     const ALL_UNITS = result.data.EdUnits
 
                     // Фильтрация. Необходимы только ИНДИВИДУАЛЬНЫЕ УРОКИ, которые принадлежат менти
                     const ALL_INDIVIDLESSON_BY_MENTEES_LIST = ALL_UNITS.filter((unit, index) => {
-                        return IDs_MENTEES_LIST.has(unit.ScheduleItems[0].TeacherId) && unit.Type != 'TrialLesson'
+                        return IDs_MENTEES_LIST.has(unit.ScheduleItems[0].TeacherId) && unit.Type != 'TrialLesson' && unit.FiscalInfo.Units != '0 астр.ч.'
                     })
 
                     // Фильтрация. Необходимы только ПРОБНЫЕ УРОКИ, которые принадлежат менти
                     const ALL_TRIALLESSON_BY_MENTEES_LIST = ALL_UNITS.filter((unit, index) => {
-                        return IDs_MENTEES_LIST.has(unit.ScheduleItems[0].TeacherId) && unit.Type == 'TrialLesson'
+                        return IDs_MENTEES_LIST.has(unit.ScheduleItems[0].TeacherId) && unit.Type == 'TrialLesson' || unit.FiscalInfo.Units == '0 астр.ч.'
                     })
 
                     const ALL_FIRST_LESSONS = []

@@ -52,7 +52,7 @@ export default {
         getCurrentUser() { this.downloadCurrentUser() },
         'infoCurrentUser.Phone'() {
             let str = this.infoCurrentUser.Phone
-            let rgx = /^(\+|\d)?(\d)*$/
+            let rgx = /^(\+|\d)?(\d|\s)*$/
             if (!rgx.test(str)) {
                 this.infoCurrentUser.Phone = str.slice(0, -1)
             }

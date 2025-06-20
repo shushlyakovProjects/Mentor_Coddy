@@ -67,7 +67,7 @@ export default {
     watch: {
         'infoNewUser.Phone'() {
             let str = this.infoNewUser.Phone
-            let rgx = /^(\+|\d)?(\d)*$/
+            let rgx = /^(\+|\d)?(\d|\s)*$/
             if (!rgx.test(str)) {
                 this.infoNewUser.Phone = str.slice(0, -1)
             }
