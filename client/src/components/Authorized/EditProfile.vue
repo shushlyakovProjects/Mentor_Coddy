@@ -52,7 +52,7 @@ export default {
         getCurrentUser() { this.fillAllFields() },
         'infoCurrentUser.phone_number'() {
             let str = this.infoCurrentUser.phone_number
-            let rgx = /^(\+|\d)?(\d)*$/
+            let rgx = /^(\+|\d)?(\d|\s)*$/
             if (!rgx.test(str)) { his.infoCurrentUser.phone_number = str.slice(0, -1) }
         }
     },

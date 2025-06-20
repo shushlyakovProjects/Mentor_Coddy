@@ -75,11 +75,15 @@ export default {
         updateCommentLocal(state, CommentInfo) {
             const mentee = state.MENTEE_LIST.find((mentee) => mentee.Id == CommentInfo.MenteeId)
 
-            mentee.PrevBrief = {
-                CommentDate: new Date(),
-                CommentContent: CommentInfo.Content,
-                CommentColor: CommentInfo.Color
-            }
+             mentee.PrevBrief.CommentDate = new Date()
+             mentee.PrevBrief.CommentContent = CommentInfo.Content
+             mentee.PrevBrief.CommentColor = CommentInfo.Color
+
+            // mentee.PrevBrief = {
+            //     CommentDate: new Date(),
+            //     CommentContent: CommentInfo.Content,
+            //     CommentColor: CommentInfo.Color
+            // }
         },
         updateMenteeList(state, newData) {
             if (state.MENTEE_LIST.length == 0) { state.MENTEE_LIST = newData }

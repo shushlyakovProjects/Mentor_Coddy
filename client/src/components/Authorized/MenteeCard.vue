@@ -31,7 +31,7 @@
                             <p class="small"><b>Статус:</b> {{ selectedMentee.Status }}</p>
                             <p class="small"><b>Всего:</b> {{ numberWorkDays(selectedMentee.Created) }} дн.</p>
                             <p class="small"><b>Работает с:</b> {{ formatDate(selectedMentee.Created) }}</p>
-                            <p class="small" v-if="selectedMentee.PrevBrief != undefined">
+                            <p class="small" v-if="selectedMentee.PrevBrief != undefined && selectedMentee.PrevBrief.DateOfFirstUnit">
                                 <b>Первый постоянный:</b><br>
                                 {{ selectedMentee.PrevBrief.DateOfFirstUnit}}
                             </p>

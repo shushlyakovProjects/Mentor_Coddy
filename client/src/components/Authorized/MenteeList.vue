@@ -63,8 +63,9 @@
                             title="За последнюю неделю">
                             ПУ за неделю:
                             {{ item.InfoEdUnits.CountTrialUnitsForWeek }}
-                            ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountTrialUnitsForWeek : 0,
-                                item.PrevBrief ? item.PrevBrief.CountTrialUnitsForWeek : 0) }})
+                            <!-- Функция отключена 20.06.25 как неиспользуемая -->
+                            <!-- ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountTrialUnitsForWeek : 0,
+                                item.PrevBrief ? item.PrevBrief.CountTrialUnitsForWeek : 0) }}) -->
                         </p>
                         <p class="small" :class="getBackLight(item.InfoEdUnits.CountTrialLessonsForSixMonths)"
                             title="За 180 дней">
@@ -83,15 +84,15 @@
                             ({{ getDifference(item.InfoEdUnits ? item.InfoEdUnits.CountConstantUnits : 0,
                                 item.PrevBrief ? item.PrevBrief.CountConstantUnits : 0) }})
                         </p>
-                        <p class="small"
+                        <p class="small" v-if="item.hasOwnProperty('PrevBrief')"
                             :class="getBackLight(item.PrevBrief.WorkHours != null ? item.PrevBrief.WorkHours / 8 : 0)">
                             Отработано часов:
                             {{ item.PrevBrief.WorkHours != null ? item.PrevBrief.WorkHours : 0 }}</p>
+                        <p class="small backlight_green-1" v-else>Новый менти</p>
                         <p class="verysmall"
                             :class="getBackLight(item.Disciplines != undefined ? item.Disciplines.length : 0)">
                             Дисциплин:
                             {{ item.Disciplines != undefined ? item.Disciplines.length : 'Не указаны' }}</p>
-
                     </div>
 
                     <div>
