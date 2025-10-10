@@ -377,6 +377,7 @@ label:focus,
 
 .fields__item label:has(input:checked) {
     background: var(--color_accent_pink);
+    color: var(--color_background-3_white);
 }
 
 .mark {

@@ -4,7 +4,7 @@
 
             <header ref="summary_header">
                 <div>
-                    <h2>Сводка (Ментор = Шушляков Н)</h2>
+                    <h2>Сводка по менти</h2>
                 </div>
 
                 <nav>
@@ -36,7 +36,7 @@
                 <!-- Менти прибывшие/завершившие -->
                 <div class="summary_wrapper-item">
                     <div class="summary__card">
-                        <h3>Менти прибывшие:</h3>
+                        <h3>Менти прибыли:</h3>
                         <p v-for="(item, index) in getAddedMenteeList">* {{ item.LastName }} {{ item.FirstName }}
                             <a :href='`https://coddy.t8s.ru/Profile/${item.Id}`' target="_blank">CRM</a>
                         </p>
@@ -45,7 +45,7 @@
                     </div>
 
                     <div class="summary__card">
-                        <h3>Менти завершившие:</h3>
+                        <h3>Менти завершили:</h3>
                         <p v-for="(item, index) in getExcludedMenteeList">
                             * {{ item.LastName }} {{ item.FirstName }}
                             <a :href='`https://coddy.t8s.ru/Profile/${item.MenteeId}`' target="_blank">CRM</a>
@@ -120,11 +120,11 @@ export default {
         if (this.getFeedbackList.length == 0) { this.$store.dispatch('downloadFeedbackFromDatabase') }
     },
     computed: {
-        ...mapGetters(['getMenteeListOnlyShushlyakov', 'getPreviousSummaryWeekly',
+        ...mapGetters(['getMenteeList', 'getPreviousSummaryWeekly',
             'getPreviousSummaryMonthly', 'getAddedMenteeList', 'getExcludedMenteeList', 'getFeedbackList'])
     },
     watch: {
-        getMenteeListOnlyShushlyakov() { this.updateFields() },
+        getMenteeList() { this.updateFields() },
     },
     methods: {
         getSummaryFromDataBase() {
@@ -143,7 +143,8 @@ export default {
         },
         updateFields() {
             // ВРЕМЕННО. ПОЗЖЕ нужно сменить на получение ВСЕХ менти
-            const LIST = this.getMenteeListOnlyShushlyakov
+            // const LIST = this.getMenteeListOnlyShushlyakov
+            const LIST = this.getMenteeList
             this.fields.countOfMentee = LIST.length
 
             this.fields.countOfConstantUnits = 0
@@ -152,7 +153,7 @@ export default {
             LIST.forEach(mentee => {
                 this.fields.countOfConstantUnits += mentee.InfoEdUnits.CountConstantUnits
                 this.fields.countOfNewTrials += mentee.InfoEdUnits.CountTrialUnitsForWeek
-                console.log(this.fields.countOfConstantUnits);
+                // console.log(this.fields.countOfConstantUnits);
                 
                 if (mentee.InfoEdUnits.CountConstantUnits > 0) {
                     this.fields.countOfMenteeWithConstantUnits++
@@ -169,7 +170,7 @@ export default {
             });
         },
         async getMenteeData() {
-            if (this.getMenteeListOnlyShushlyakov.length == 0) { await this.$store.dispatch('downloadMenteeData') }
+            if (this.getMenteeList.length == 0) { await this.$store.dispatch('downloadMenteeData') }
         },
         getDifference(oldVal = 0, newVal = 0) {
             return (newVal - oldVal) >= 0 ? '+' + (newVal - oldVal) : (newVal - oldVal)
