@@ -127,7 +127,8 @@
                             v-show="!item.hasOwnProperty('PhotoUrls') || !item.hasOwnProperty('JobOrStudyPlace')"
                             title="СРМ заполнен не полностью">❗️</p>
 
-                        <p title="ОС отсутсвует">{{ item.Feedback == undefined ? '❌' : '' }}</p>
+                        <!-- Индикатор отключен 10.10.25 из-за ненадобности -->
+                        <!-- <p title="ОС отсутсвует">{{ item.Feedback == undefined ? '❌' : '' }}</p> -->
                         <p title="ОС получена">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) >= new
                             Date() - (10 * 24 * 60 * 60 * 1000) ? '✅' : '' : '' }}</p>
                         <p title="ОС устарела">{{ item.Feedback != undefined ? new Date(item.Feedback.Date) < new Date()

@@ -42,15 +42,15 @@
             </div>
         </div>
         <div class="filtres__item">
-            <p class="small">ОС не позже</p>
+            <p class="small">ОС после</p>
             <div id="filter5">
                 <input type="date" v-model="filter.feedbackDate">
             </div>
         </div>
-        <label for="filter6" class="filtres__item">
+        <!-- <label for="filter6" class="filtres__item">
             <p class="small">Ментор Шушляков Н</p>
             <input type="checkbox" id="filter6" v-model="filter.menteesOfShushlyakov">
-        </label>
+        </label> -->
         <label for="filter7" class="filtres__item">
             <p class="small">Раскраска</p>
             <input type="checkbox" id="filter7" v-model="filter.backLight">
@@ -65,7 +65,7 @@ export default {
     data() {
         return {
             filter: {
-                menteesOfShushlyakov: true, // Временный фильтр
+                // menteesOfShushlyakov: true, // Временный фильтр
                 disciplines: '',
                 fioInclude: '',
                 sortOfEdUnits: '', // asc - desc
@@ -86,7 +86,7 @@ export default {
     methods: {
         clearFiltres() {
             this.filter = {
-                menteesOfShushlyakov: true, // Временный фильтр
+                // menteesOfShushlyakov: true, // Временный фильтр
                 disciplines: '',
                 fioInclude: '',
                 sortOfEdUnits: '', // asc - desc

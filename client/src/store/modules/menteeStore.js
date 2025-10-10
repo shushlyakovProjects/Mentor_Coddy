@@ -78,12 +78,6 @@ export default {
              mentee.PrevBrief.CommentDate = new Date()
              mentee.PrevBrief.CommentContent = CommentInfo.Content
              mentee.PrevBrief.CommentColor = CommentInfo.Color
-
-            // mentee.PrevBrief = {
-            //     CommentDate: new Date(),
-            //     CommentContent: CommentInfo.Content,
-            //     CommentColor: CommentInfo.Color
-            // }
         },
         updateMenteeList(state, newData) {
             if (state.MENTEE_LIST.length == 0) { state.MENTEE_LIST = newData }
@@ -92,21 +86,6 @@ export default {
             })
             this.commit('updateMessageSuccess', { info: 'Данные менти получены успешно!', isReady: true })
         },
-        // addTrialLessonsToMenteeList(state, TRIALS_LIST) {
-        //     state.MENTEE_LIST.forEach(mentee => {
-        //         mentee.InfoEdUnits.CountTrialLessonsForSixMonths = 0
-        //         if (mentee.Id in TRIALS_LIST) {
-        //             for (let key in TRIALS_LIST) {
-        //                 if (mentee.Id == key) {
-        //                     mentee.InfoEdUnits.CountTrialLessonsForSixMonths = TRIALS_LIST[key]
-        //                     continue
-        //                 }
-        //             }
-        //         }
-        //     })
-        //     this.commit('updateMessageSuccess', 'Данные по ПУ за полгода получены!')
-        //     setTimeout(() => { state.messages.success = '' }, 3000)
-        // },
         updateMessageError(state, info) {
             state.messages.error = info
             setTimeout(() => { state.messages.error = '' }, 3000)
@@ -132,8 +111,8 @@ export default {
         },
 
         // Временная модель (для фильтра)
-        menteesIsNotOfShushlyakov: ['Мосеечева', 'Селезнев', 'Зимарев', 'Халлыев', 'Куликов', 'Каллио', 'Николаева', 'Дудкин',
-            'Юдин', 'Петрова', 'Тихонова', 'Валиуллин', 'Бочкарев', 'Рест', 'Саковых', 'Носков', 'Сарычева', 'Почестнев', 'Проданов']
+        // menteesIsNotOfShushlyakov: ['Мосеечева', 'Селезнев', 'Зимарев', 'Халлыев', 'Куликов', 'Каллио', 'Николаева', 'Дудкин',
+            // 'Юдин', 'Петрова', 'Тихонова', 'Валиуллин', 'Бочкарев', 'Рест', 'Саковых', 'Носков', 'Сарычева', 'Почестнев', 'Проданов']
     },
     getters: {
         getFeedbackList(state) { return state.FEEDBACK_LIST },
@@ -167,11 +146,11 @@ export default {
         getExcludedMenteeList(state) { return state.EXCLUDED_MENTEE_LIST },
         getMenteeList(state) { return state.MENTEE_LIST },
         getMenteeListWithFiltres: (state) => (filtres) => {
-            const { feedbackDate, menteesOfShushlyakov, disciplines, fioInclude, workDays, sortOfEdUnits, sortOfWorkHours } = filtres
+            const { feedbackDate, disciplines, fioInclude, workDays, sortOfEdUnits, sortOfWorkHours } = filtres
             let filtredList = []
 
             filtredList = state.MENTEE_LIST.filter((elem) => {
-                let check1 = menteesOfShushlyakov ? !state.menteesIsNotOfShushlyakov.includes(elem.LastName) : state.menteesIsNotOfShushlyakov.includes(elem.LastName)
+                // let check1 = menteesOfShushlyakov ? !state.menteesIsNotOfShushlyakov.includes(elem.LastName) : state.menteesIsNotOfShushlyakov.includes(elem.LastName)
                 let check2 = fioInclude ? `${elem.LastName} ${elem.FirstName}`.toLowerCase().includes(fioInclude.toLowerCase()) : true
 
                 let workDaysValue = Math.round((new Date() - new Date(elem.Created)) / 1000 / 60 / 60 / 24)
@@ -182,7 +161,7 @@ export default {
 
                 let check5 = feedbackDate ? elem.Feedback != undefined ? new Date(elem.Feedback.Date) >= new Date(feedbackDate) : false : true
 
-                return check1 && check2 && check3 && check4 && check5
+                return check2 && check3 && check4 && check5
             })
 
             // Сортировка по постоянным ученикам
@@ -197,11 +176,11 @@ export default {
 
             return filtredList
         },
-        getMenteeListOnlyShushlyakov(state) {
-            const MenteeListOnlyShushlyakov = state.MENTEE_LIST.filter((mentee) => {
-                return !state.menteesIsNotOfShushlyakov.includes(mentee.LastName)
-            })
-            return MenteeListOnlyShushlyakov
-        }
+        // getMenteeListOnlyShushlyakov(state) {
+        //     const MenteeListOnlyShushlyakov = state.MENTEE_LIST.filter((mentee) => {
+        //         return !state.menteesIsNotOfShushlyakov.includes(mentee.LastName)
+        //     })
+        //     return MenteeListOnlyShushlyakov
+        // }
     }
 }
