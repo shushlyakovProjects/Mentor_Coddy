@@ -29,7 +29,7 @@
                         <p>С постоянными учениками: {{ fields.countOfMenteeWithConstantUnits }}</p>
                         <p>Без постоянных учеников: {{ fields.countOfMenteeWithoutConstantUnits }}</p>
                         <p>Занятых: {{ (fields.countOfMenteeWithConstantUnits / fields.countOfMentee * 100).toFixed(2)
-                        }}%</p>
+                            }}%</p>
                     </div>
                 </div>
 
@@ -64,9 +64,13 @@
                         <p>Предыдущая фиксация: {{ getPreviousSummaryWeekly.DateOfUpdate }}</p>
                     </div>
                     <div class="summary__card">
-                        <p>Количество новичков: {{ getDifference(getPreviousSummaryWeekly.CountOfMentee, fields.countOfMentee) }}</p>
-                        <p>Получено учеников: {{ getDifference(getPreviousSummaryWeekly.CountOfConstantUnits,fields.countOfConstantUnits) }}</p>
-                        <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryWeekly.СountOfNewTrials}}</p>
+                        <p>Количество новичков: {{ getDifference(getPreviousSummaryWeekly.CountOfMentee,
+                            fields.countOfMentee) }}</p>
+                        <p>Получено учеников: {{
+                            getDifference(getPreviousSummaryWeekly.CountOfConstantUnits, fields.countOfConstantUnits) }}
+                        </p>
+                        <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryWeekly.СountOfNewTrials }}
+                        </p>
                         <!-- <p>Завершено модулей: {{ fields.countOfPaidModules - getPreviousSummaryWeekly.CountOfPaidModules }}</p> -->
                     </div>
                 </div>
@@ -78,9 +82,12 @@
                         <p>Предыдущая фиксация: {{ getPreviousSummaryMonthly.DateOfUpdate }}</p>
                     </div>
                     <div class="summary__card">
-                        <p>Количество новичков: {{ getDifference(getPreviousSummaryMonthly.CountOfMentee, fields.countOfMentee)  }}</p>
-                        <p>Получено учеников: {{getDifference(getPreviousSummaryMonthly.CountOfConstantUnits, fields.countOfConstantUnits)}}</p>
-                        <p>Проведено пробников: {{ fields.countOfNewTrials -getPreviousSummaryMonthly.СountOfNewTrials }}</p>
+                        <p>Количество новичков: {{ getDifference(getPreviousSummaryMonthly.CountOfMentee,
+                            fields.countOfMentee) }}</p>
+                        <p>Получено учеников: {{ getDifference(getPreviousSummaryMonthly.CountOfConstantUnits,
+                            fields.countOfConstantUnits)}}</p>
+                        <p>Проведено пробников: {{ fields.countOfNewTrials - getPreviousSummaryMonthly.СountOfNewTrials
+                            }}</p>
                         <!-- <p>Завершено модулей: {{ fields.countOfPaidModules - getPreviousSummaryMonthly.CountOfPaidModules }}</p> -->
                     </div>
                 </div>
@@ -154,7 +161,7 @@ export default {
                 this.fields.countOfConstantUnits += mentee.InfoEdUnits.CountConstantUnits
                 this.fields.countOfNewTrials += mentee.InfoEdUnits.CountTrialUnitsForWeek
                 // console.log(this.fields.countOfConstantUnits);
-                
+
                 if (mentee.InfoEdUnits.CountConstantUnits > 0) {
                     this.fields.countOfMenteeWithConstantUnits++
                 } else {

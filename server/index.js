@@ -34,24 +34,3 @@ app.use('/server/from-mentee', menteeController)
 // Старт серверного приложения
 const PORT = process.env.SERVER_PORT
 app.listen(PORT, () => { console.log(`Server is running on PORT: ${PORT}`); })
-
-
-
-// app.get('/', (request, response) => { response.status(200).send(`<H1>Server is running on ${PORT}...</H1>`) })
-// -----
-// app.post('/testAdmin', (request, response) => {
-//     console.log('Проверка существования пользователей');
-//     const SQL_QUERY = 'SELECT * FROM users'
-//     connectionDB.query(SQL_QUERY, (error, result) => {
-//         if (error) {
-//             console.log('Database error! Occurred while checking the admin. ');
-//             response.status(500).send('Database error!')
-//         }
-//         else {
-//             if (result.length == 0) {
-//                 console.log('Moving to registration of a new administator...');
-//                 response.status(302).send('/reg-admin')
-//             }
-//         }
-//     })
-// })
